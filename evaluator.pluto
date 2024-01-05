@@ -1,3 +1,5 @@
+-- @pluto_warnings enable-non-portable-bytecode
+
 local function readfile(path)
 	local f <close> = io.open(path, "rb")
 	return f:read("*a")
@@ -36,7 +38,7 @@ export function evaluate_build(build)
 		eval.armor = pe_data.armor
 		eval.power = pe_data.power
 
-		local rank = build.powersuit.rank ?? 30
+		local rank = build.powersuit.rank or 30
 		switch pe_data.parentName do
 			case "/Lotus/Powersuits/Sandman/SandmanBaseSuit": -- Inaros
 			case "/Lotus/Powersuits/Devourer/DevourerBaseSuit": -- Grendel
@@ -79,7 +81,7 @@ export function evaluate_build(build)
 			local upgrades = {}
 			for build.powersuit.mods as mod do
 				for overframe_mods[mod.name].data.Upgrades as upgrade do
-					upgrades[upgrade.UpgradeType] = (upgrades[upgrade.UpgradeType] ?? 0) + upgrade.Value * (mod.rank ? mod.rank + 1 : 1)
+					upgrades[upgrade.UpgradeType] = (upgrades[upgrade.UpgradeType] or 0) + upgrade.Value * (mod.rank ? mod.rank + 1 : 1)
 				end
 			end
 			if upgrades.AVATAR_HEALTH_MAX then
