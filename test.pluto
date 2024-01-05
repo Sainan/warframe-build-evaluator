@@ -70,3 +70,15 @@ do
 	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 0 }}}}.health, 2502))
 	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 }}}}.health, 3464))
 end
+do
+	assert(about_equal(evaluate_build{
+	    powersuit = {
+	        name = "/Lotus/Powersuits/Sandman/Sandman",
+	        rank = 30,
+	        mods = {
+	            { name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 10 },
+	            { name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 },
+	        }
+	    }
+	}.health, 5774))
+end
