@@ -1,0 +1,103 @@
+local function readfile(path)
+	local f <close> = io.open(path, "rb")
+	return f:read("*a")
+end
+
+local json = require "pluto:json"
+
+local ExportUpgrades = json.decode(readfile("data/ExportUpgrades_en.json")).ExportUpgrades
+local ExportWarframes = json.decode(readfile("data/ExportWarframes_en.json")).ExportWarframes
+
+local function get_powersuit_data_from_public_export(uniqueName: string): ?table
+	for ExportWarframes as item do
+		if item.uniqueName == uniqueName then
+			return item
+		end
+	end
+	return nil
+end
+
+local function get_upgrade_data_from_public_export(uniqueName: string): ?table
+	for ExportUpgrades as item do
+		if item.uniqueName == uniqueName then
+			return item
+		end
+	end
+	return nil
+end
+
+local function apply_stat(build, stat)
+	if stat:sub(-7) == " Health" then
+		local s, e = stat:find("%d+")
+		local percentage = stat:sub(s, e)
+		if #percentage >= 3 then
+			build.health *= 1 + (percentage / 100)
+		else
+			--  +9% -> 1.09090909090909
+			-- +18% -> 1.18181818181818
+			if #percentage < 2 then
+				percentage = "0"..percentage
+			end
+			build.health *= "1."..percentage:rep(7)
+		end
+	end
+end
+
+export function evaluate_build(build)
+	local eval = {}
+	if build.powersuit then
+		local pe_data = get_powersuit_data_from_public_export(build.powersuit.name)
+		eval.health = pe_data.health
+		eval.shield = pe_data.shield
+		eval.armor = pe_data.armor
+		eval.power = pe_data.power
+
+		local rank = build.powersuit.rank ?? 30
+		switch pe_data.parentName do
+			case "/Lotus/Powersuits/Sandman/SandmanBaseSuit": -- Inaros
+			case "/Lotus/Powersuits/Devourer/DevourerBaseSuit": -- Grendel
+				eval.health += (rank + 2) // 3 * 10
+				eval.health += (rank + 1) // 3 * 10
+				eval.power += rank // 3 * 5
+				break
+
+			case "/Lotus/Powersuits/Infestation/InfestationBaseSuit": -- Nidus
+				eval.health += (rank + 2) // 3 * 10
+				eval.armor += (rank + 1) // 3 * 10
+				eval.power += rank // 3 * 5
+				break
+
+			case "/Lotus/Powersuits/IronFrame/IronFrameBaseSuit": -- Hildryn
+				eval.health += 100
+				eval.shield += 500
+				break
+
+			case "/Lotus/Powersuits/BrokenFrame/BrokenFrameBaseSuit": -- Xaku
+				eval.health += 90
+				eval.shield += 90
+				eval.power += 70
+				break
+
+			case "/Lotus/Powersuits/Alchemist/AlchemistBaseSuit": -- Lavos
+				eval.health += 200
+				eval.shield += 100
+				eval.armor += 100
+				break
+
+			default:
+				eval.health += (rank + 2) // 3 * 10
+				eval.shield += (rank + 1) // 3 * 10
+				eval.power += rank // 3 * 5
+		end
+
+		if build.powersuit.mods then
+			for build.powersuit.mods as mod do
+				pe_data = get_upgrade_data_from_public_export(mod.name)
+				for pe_data.levelStats[(mod.rank ?? pe_data.fusionLimit) + 1].stats as stat do
+					apply_stat(eval, stat)
+				end
+			end
+		end
+	end
+	return eval
+end
