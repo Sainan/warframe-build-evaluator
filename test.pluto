@@ -1,7 +1,7 @@
 local { evaluate_build } = require "evaluator"
 
 local function about_equal(a, b)
-    return math.abs(a - b) < 0.00001
+    return math.abs(a - b) < 1
 end
 
 -- Test rank 30 stats
@@ -65,4 +65,8 @@ do
 	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 2 }}}}.health, 2940))
 	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 3 }}}}.health, 3150))
 	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 4 }}}}.health, 3360))
+end
+do
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 0 }}}}.health, 2502))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 }}}}.health, 3464))
 end

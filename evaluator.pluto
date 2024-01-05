@@ -7,6 +7,7 @@ local json = require "pluto:json"
 
 local ExportUpgrades = json.decode(readfile("data/ExportUpgrades_en.json")).ExportUpgrades
 local ExportWarframes = json.decode(readfile("data/ExportWarframes_en.json")).ExportWarframes
+local overframe_mods = json.decode(readfile("data/overframe_mods.json"))
 
 local function get_powersuit_data_from_public_export(uniqueName: string): ?table
 	for ExportWarframes as item do
@@ -24,23 +25,6 @@ local function get_upgrade_data_from_public_export(uniqueName: string): ?table
 		end
 	end
 	return nil
-end
-
-local function apply_stat(build, stat)
-	if stat:sub(-7) == " Health" then
-		local s, e = stat:find("%d+")
-		local percentage = stat:sub(s, e)
-		if #percentage >= 3 then
-			build.health *= 1 + (percentage / 100)
-		else
-			--  +9% -> 1.09090909090909
-			-- +18% -> 1.18181818181818
-			if #percentage < 2 then
-				percentage = "0"..percentage
-			end
-			build.health *= "1."..percentage:rep(7)
-		end
-	end
 end
 
 export function evaluate_build(build)
@@ -93,9 +77,10 @@ export function evaluate_build(build)
 
 		if build.powersuit.mods then
 			for build.powersuit.mods as mod do
-				pe_data = get_upgrade_data_from_public_export(mod.name)
-				for pe_data.levelStats[(mod.rank ?? pe_data.fusionLimit) + 1].stats as stat do
-					apply_stat(eval, stat)
+				for overframe_mods[mod.name].data.Upgrades as upgrade do
+					if upgrade.UpgradeType == "AVATAR_HEALTH_MAX" then
+						eval.health *= 1 + upgrade.Value * (mod.rank ? mod.rank + 1 : 1)
+					end
 				end
 			end
 		end
