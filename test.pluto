@@ -49,7 +49,7 @@ do
 	assert(lavos.power == 0)
 end
 
--- Test intermediate rank stats (not quite perfect yet, but should work for most cases)
+-- Test intermediate rank stats
 do
 	local base = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 0 } }
 	local r22 = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 22 } }

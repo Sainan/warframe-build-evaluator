@@ -68,20 +68,21 @@ export function evaluate_build(build)
 				break
 
 			case "/Lotus/Powersuits/IronFrame/IronFrameBaseSuit": -- Hildryn
-				eval.health += 100
-				eval.shield += 500
+				eval.health += (rank + 2) // 3 * 10
+				eval.shield += (rank + 1) // 3 * 25
+				eval.shield += rank // 3 * 25
 				break
 
 			case "/Lotus/Powersuits/BrokenFrame/BrokenFrameBaseSuit": -- Xaku
-				eval.health += 90
-				eval.shield += 90
-				eval.power += 70
+				eval.health += (rank + 2) // 3 * 9
+				eval.shield += (rank + 1) // 3 * 9
+				eval.power += rank // 3 * 7
 				break
 
 			case "/Lotus/Powersuits/Alchemist/AlchemistBaseSuit": -- Lavos
-				eval.health += 200
-				eval.shield += 100
-				eval.armor += 100
+				eval.health += (rank + 2) // 3 * 20
+				eval.shield += (rank + 1) // 3 * 10
+				eval.armor += rank // 3 * 10
 				break
 
 			default:
