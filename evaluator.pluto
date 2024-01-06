@@ -7,21 +7,11 @@ end
 
 local json = require "pluto:json"
 
-local ExportUpgrades = json.decode(readfile("data/ExportUpgrades_en.json")).ExportUpgrades
 local ExportWarframes = json.decode(readfile("data/ExportWarframes_en.json")).ExportWarframes
 local overframe_mods = json.decode(readfile("data/overframe_mods.json"))
 
 local function get_powersuit_data_from_public_export(uniqueName: string): ?table
 	for ExportWarframes as item do
-		if item.uniqueName == uniqueName then
-			return item
-		end
-	end
-	return nil
-end
-
-local function get_upgrade_data_from_public_export(uniqueName: string): ?table
-	for ExportUpgrades as item do
 		if item.uniqueName == uniqueName then
 			return item
 		end
