@@ -121,3 +121,11 @@ export function evaluate_build(build)
 	end
 	return eval
 end
+
+export function armor_to_damage_reduction(armor)
+	return armor / (armor + 300)
+end
+
+export function calculate_effective_health(health, damage_reduction)
+	return health / (1 - damage_reduction)
+end
