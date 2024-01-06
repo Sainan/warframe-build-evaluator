@@ -108,6 +108,9 @@ export function evaluate_build(build)
 			if upgrades.AVATAR_HEALTH_MAX then
 				eval.health *= 1 + upgrades.AVATAR_HEALTH_MAX
 			end
+			if upgrades.AVATAR_ARMOUR then
+				eval.armor *= 1 + upgrades.AVATAR_ARMOUR
+			end
 		end
 	end
 	return eval
