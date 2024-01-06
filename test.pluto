@@ -95,3 +95,19 @@ do
 	    }
 	}.health, 5774))
 end
+
+-- Test set mods
+do
+	local inaros_with_umbral_vitality_and_fiber = evaluate_build{
+	    powersuit = {
+	        name = "/Lotus/Powersuits/Sandman/Sandman",
+	        rank = 30,
+	        mods = {
+	            { name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModA", rank = 10 },
+	            { name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModB", rank = 10 },
+	        }
+	    }
+	}
+	assert(about_equal(inaros_with_umbral_vitality_and_fiber.health, 5313))
+	assert(about_equal(inaros_with_umbral_vitality_and_fiber.armor, 552))
+end

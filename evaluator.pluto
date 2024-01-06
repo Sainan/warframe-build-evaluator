@@ -19,6 +19,16 @@ local function get_powersuit_data_from_public_export(uniqueName: string): ?table
 	return nil
 end
 
+local function get_num_mods_from_set(mods, set)
+	local n = 0
+	for mods as mod do
+		if overframe_mods[mod.name].data.ModSet == set then
+			++n
+		end
+	end
+	return n
+end
+
 export function evaluate_build(build)
 	local eval = {}
 	if build.powersuit then
@@ -91,8 +101,14 @@ export function evaluate_build(build)
 		if build.powersuit.mods then
 			local upgrades = {}
 			for build.powersuit.mods as mod do
-				for overframe_mods[mod.name].data.Upgrades as upgrade do
-					upgrades[upgrade.UpgradeType] = (upgrades[upgrade.UpgradeType] or 0) + upgrade.Value * (mod.rank ? mod.rank + 1 : 1)
+				local mod_data = overframe_mods[mod.name].data
+				local set_bonus = 1
+				if mod_data.ModSetValues then
+					local n = get_num_mods_from_set(build.powersuit.mods, mod_data.ModSet)
+					set_bonus += mod_data.ModSetValues[n - 1]
+				end
+				for mod_data.Upgrades as upgrade do
+					upgrades[upgrade.UpgradeType] = (upgrades[upgrade.UpgradeType] or 0) + upgrade.Value * (mod.rank ? mod.rank + 1 : 1) * set_bonus
 				end
 			end
 			if upgrades.AVATAR_HEALTH_MAX then
