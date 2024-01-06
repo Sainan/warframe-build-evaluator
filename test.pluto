@@ -1,4 +1,4 @@
-local { evaluate_build } = require "evaluator"
+local { evaluate_build, parse_build, build_applyNoConditionals, build_applyAllConditionals } = require "evaluator"
 
 local function about_equal(a, b)
 	return math.abs(a - b) < 1
@@ -110,4 +110,18 @@ do
 	}.powersuit
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.health, 5313))
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.armor, 552))
+end
+
+-- Conditionals
+do
+	local build = parse_build{
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Swords/PrimeKatana/PrimeNikana",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Melee/Event/ComboCritChanceMod", rank = 10 }, -- Blood Rush
+			}
+		}
+	}
+	assert(about_equal(build_applyNoConditionals(build).melee.crit_chance * 100, 28))
+	assert(about_equal(build_applyAllConditionals(build).melee.crit_chance * 100, 151.3))
 end
