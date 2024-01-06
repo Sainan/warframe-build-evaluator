@@ -168,6 +168,21 @@ export function parse_build(build)
 						})
 					end
 				end
+			else
+				for mod_data.Upgrades as upgrade do
+					if upgrade.UpgradeType == "WEAPON_CRIT_CHANCE" then
+						if #upgrade.ValidModifiers ~= 0 then
+							stat_addConditional(eval.melee.crit_chance, {
+								type = upgrade.ValidModifiers[1],
+								max_stacks = 1,
+								operation = upgrade.OperationType,
+								value = upgrade.Value * ((mod.rank or 0) + 1)
+							})
+						else
+							eval.melee.crit_chance.stacking_multiply_base = (eval.melee.crit_chance.stacking_multiply_base or 1) + upgrade.Value * ((mod.rank or 0) + 1)
+						end
+					end
+				end
 			end
 		end
 	end
