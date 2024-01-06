@@ -39,6 +39,13 @@ local function get_num_mods_from_set(mods, set)
 	return n
 end
 
+local function gear_getStat(gear, upgradeType): ?table
+	if upgradeType == "WEAPON_CRIT_CHANCE" then
+		return gear.crit_chance
+	end
+	return nil
+end
+
 local function stat_addConditional(stat, conditional)
 	if not stat.conditionals then
 		stat.conditionals = {}
@@ -159,8 +166,8 @@ export function parse_build(build)
 			local mod_data = overframe_mods[mod.name].data
 			if mod_data.ConditionalUpgrades then
 				for mod_data.Upgrades as upgrade do
-					if upgrade.UpgradeType == "WEAPON_CRIT_CHANCE" then
-						stat_addConditional(eval.melee.crit_chance, {
+					if stat := gear_getStat(eval.melee, upgrade.UpgradeType) then
+						stat_addConditional(stat, {
 							type = mod_data.ConditionalUpgrades[1],
 							max_stacks = mod_data.MaxConditionalStacks,
 							operation = upgrade.OperationType,
@@ -170,16 +177,16 @@ export function parse_build(build)
 				end
 			else
 				for mod_data.Upgrades as upgrade do
-					if upgrade.UpgradeType == "WEAPON_CRIT_CHANCE" then
+					if stat := gear_getStat(eval.melee, upgrade.UpgradeType) then
 						if #upgrade.ValidModifiers ~= 0 then
-							stat_addConditional(eval.melee.crit_chance, {
+							stat_addConditional(stat, {
 								type = upgrade.ValidModifiers[1],
 								max_stacks = 1,
 								operation = upgrade.OperationType,
 								value = upgrade.Value * ((mod.rank or 0) + 1)
 							})
 						else
-							eval.melee.crit_chance.stacking_multiply_base = (eval.melee.crit_chance.stacking_multiply_base or 1) + upgrade.Value * ((mod.rank or 0) + 1)
+							stat.stacking_multiply_base = (stat.stacking_multiply_base or 1) + upgrade.Value * ((mod.rank or 0) + 1)
 						end
 					end
 				end
