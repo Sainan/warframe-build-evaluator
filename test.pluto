@@ -1,7 +1,7 @@
 local { evaluate_build } = require "evaluator"
 
 local function about_equal(a, b)
-    return math.abs(a - b) < 1
+	return math.abs(a - b) < 1
 end
 
 -- Test rank 30 stats
@@ -85,28 +85,28 @@ do
 end
 do
 	assert(about_equal(evaluate_build{
-	    powersuit = {
-	        name = "/Lotus/Powersuits/Sandman/Sandman",
-	        rank = 30,
-	        mods = {
-	            { name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 10 },
-	            { name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 },
-	        }
-	    }
+		powersuit = {
+			name = "/Lotus/Powersuits/Sandman/Sandman",
+			rank = 30,
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 10 },
+				{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 },
+			}
+		}
 	}.health, 5774))
 end
 
 -- Test set mods
 do
 	local inaros_with_umbral_vitality_and_fiber = evaluate_build{
-	    powersuit = {
-	        name = "/Lotus/Powersuits/Sandman/Sandman",
-	        rank = 30,
-	        mods = {
-	            { name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModA", rank = 10 },
-	            { name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModB", rank = 10 },
-	        }
-	    }
+		powersuit = {
+			name = "/Lotus/Powersuits/Sandman/Sandman",
+			rank = 30,
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModA", rank = 10 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModB", rank = 10 },
+			}
+		}
 	}
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.health, 5313))
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.armor, 552))
