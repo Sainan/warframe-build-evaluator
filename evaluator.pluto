@@ -139,7 +139,7 @@ export function parse_build(build)
 					set_bonus += mod_data.ModSetValues[n - 1]
 				end
 				for mod_data.Upgrades as upgrade do
-					upgrades[upgrade.UpgradeType] = (upgrades[upgrade.UpgradeType] or 0) + upgrade.Value * (mod.rank ? mod.rank + 1 : 1) * set_bonus
+					upgrades[upgrade.UpgradeType] = (upgrades[upgrade.UpgradeType] or 0) + upgrade.Value * ((mod.rank or 0) + 1) * set_bonus
 				end
 			end
 			if upgrades.AVATAR_HEALTH_MAX then
@@ -164,7 +164,7 @@ export function parse_build(build)
 							type = mod_data.ConditionalUpgrades[1],
 							max_stacks = mod_data.MaxConditionalStacks,
 							operation = upgrade.OperationType,
-							value = upgrade.Value * (mod.rank ? mod.rank + 1 : 1),
+							value = upgrade.Value * ((mod.rank or 0) + 1),
 						})
 					end
 				end
