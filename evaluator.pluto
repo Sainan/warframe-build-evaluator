@@ -33,69 +33,71 @@ export function evaluate_build(build)
 	local eval = {}
 	if build.powersuit then
 		local pe_data = get_powersuit_data_from_public_export(build.powersuit.name)
-		eval.health = pe_data.health
-		eval.shield = pe_data.shield
-		eval.armor = pe_data.armor
-		eval.power = pe_data.power
+		eval.powersuit = {
+			health = pe_data.health,
+			shield = pe_data.shield,
+			armor = pe_data.armor,
+			power = pe_data.power,
+		}
 
 		local rank = build.powersuit.rank or 30
 		switch pe_data.parentName do
 			case "/Lotus/Powersuits/Sandman/SandmanBaseSuit": -- Inaros
 			case "/Lotus/Powersuits/Devourer/DevourerBaseSuit": -- Grendel
-				eval.health += (rank + 2) // 3 * 10
-				eval.health += (rank + 1) // 3 * 10
-				eval.power += rank // 3 * 5
+				eval.powersuit.health += (rank + 2) // 3 * 10
+				eval.powersuit.health += (rank + 1) // 3 * 10
+				eval.powersuit.power += rank // 3 * 5
 				break
 
 			case "/Lotus/Powersuits/Infestation/InfestationBaseSuit": -- Nidus
-				eval.health += (rank + 2) // 3 * 10
-				eval.armor += (rank + 1) // 3 * 10
-				eval.power += rank // 3 * 5
+				eval.powersuit.health += (rank + 2) // 3 * 10
+				eval.powersuit.armor += (rank + 1) // 3 * 10
+				eval.powersuit.power += rank // 3 * 5
 				break
 
 			case "/Lotus/Powersuits/PaxDuviricus/PaxDuviricusBaseSuit": -- Kullervo
-				eval.health += (rank + 2) // 3 * 20
-				eval.armor += (rank + 1) // 3 * 10
-				eval.power += rank // 3 * 5
+				eval.powersuit.health += (rank + 2) // 3 * 20
+				eval.powersuit.armor += (rank + 1) // 3 * 10
+				eval.powersuit.power += rank // 3 * 5
 				break
 
 			case "/Lotus/Powersuits/IronFrame/IronFrameBaseSuit": -- Hildryn
-				eval.health += (rank + 2) // 3 * 10
-				eval.shield += (rank + 1) // 3 * 25
-				eval.shield += rank // 3 * 25
+				eval.powersuit.health += (rank + 2) // 3 * 10
+				eval.powersuit.shield += (rank + 1) // 3 * 25
+				eval.powersuit.shield += rank // 3 * 25
 				break
 
 			case "/Lotus/Powersuits/BrokenFrame/BrokenFrameBaseSuit": -- Xaku
-				eval.health += (rank + 2) // 3 * 9
-				eval.shield += (rank + 1) // 3 * 9
-				eval.power += rank // 3 * 7
+				eval.powersuit.health += (rank + 2) // 3 * 9
+				eval.powersuit.shield += (rank + 1) // 3 * 9
+				eval.powersuit.power += rank // 3 * 7
 				break
 
 			case "/Lotus/Powersuits/Alchemist/AlchemistBaseSuit": -- Lavos
-				eval.health += (rank + 2) // 3 * 20
-				eval.shield += (rank + 1) // 3 * 10
-				eval.armor += rank // 3 * 10
+				eval.powersuit.health += (rank + 2) // 3 * 20
+				eval.powersuit.shield += (rank + 1) // 3 * 10
+				eval.powersuit.armor += rank // 3 * 10
 				break
 
 			case "/Lotus/Powersuits/Berserker/BerserkerBaseSuit": -- Valkyr
-				eval.health += (rank + 2) // 3 * 10
-				eval.shield += (rank + 1) // 3 * 5
-				eval.power += rank // 3 * 5
+				eval.powersuit.health += (rank + 2) // 3 * 10
+				eval.powersuit.shield += (rank + 1) // 3 * 5
+				eval.powersuit.power += rank // 3 * 5
 				break
 
 			case "/Lotus/Powersuits/Pacifist/PacifistBaseSuit": -- Baruuk
 			case "/Lotus/Powersuits/Garuda/GarudaBaseSuit": -- Garuda
 			case "/Lotus/Powersuits/Wisp/WispBaseSuit": -- Wisp
 			case "/Lotus/Powersuits/Yareli/YareliBaseSuit": -- Yareli
-				eval.health += (rank + 2) // 3 * 10
-				eval.shield += (rank + 1) // 3 * 10
-				eval.power += rank // 3 * 10
+				eval.powersuit.health += (rank + 2) // 3 * 10
+				eval.powersuit.shield += (rank + 1) // 3 * 10
+				eval.powersuit.power += rank // 3 * 10
 				break
 
 			default:
-				eval.health += (rank + 2) // 3 * 10
-				eval.shield += (rank + 1) // 3 * 10
-				eval.power += rank // 3 * 5
+				eval.powersuit.health += (rank + 2) // 3 * 10
+				eval.powersuit.shield += (rank + 1) // 3 * 10
+				eval.powersuit.power += rank // 3 * 5
 		end
 
 		if build.powersuit.mods then
@@ -112,10 +114,10 @@ export function evaluate_build(build)
 				end
 			end
 			if upgrades.AVATAR_HEALTH_MAX then
-				eval.health *= 1 + upgrades.AVATAR_HEALTH_MAX
+				eval.powersuit.health *= 1 + upgrades.AVATAR_HEALTH_MAX
 			end
 			if upgrades.AVATAR_ARMOUR then
-				eval.armor *= 1 + upgrades.AVATAR_ARMOUR
+				eval.powersuit.armor *= 1 + upgrades.AVATAR_ARMOUR
 			end
 		end
 	end

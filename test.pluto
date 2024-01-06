@@ -7,56 +7,56 @@ end
 -- Test rank 30 stats
 do
 	-- Most warframes just gain 100 health, 100 shield, and 50 power.
-	local excalibur = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 30 } }
+	local excalibur = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 30 } }.powersuit
 	assert(excalibur.health == 370)
 	assert(excalibur.shield == 370)
 	assert(excalibur.power == 150)
 
 	-- Then there's some who gain 200 health but no shields.
-	local inaros = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30 } }
+	local inaros = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30 } }.powersuit
 	assert(inaros.health == 2310)
 	assert(inaros.shield == 0)
 	assert(inaros.power == 150)
-	local grendel = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Devourer/Devourer", rank = 30 } }
+	local grendel = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Devourer/Devourer", rank = 30 } }.powersuit
 	assert(grendel.health == 1295)
 	assert(grendel.shield == 95)
 	assert(grendel.power == 225)
 
 	-- Nidus has no shields, instead gains 100 armor.
-	local nidus = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Infestation/Infestation", rank = 30 } }
+	local nidus = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Infestation/Infestation", rank = 30 } }.powersuit
 	assert(nidus.health == 555)
 	assert(nidus.shield == 0)
 	assert(nidus.armor == 450)
 	assert(nidus.power == 150)
 
 	-- Kullervo also has no shield and instead gains 200 health and 100 armor.
-	local kullervo = evaluate_build { powersuit = { name = "/Lotus/Powersuits/PaxDuviricus/PaxDuviricus", rank = 30 } }
+	local kullervo = evaluate_build { powersuit = { name = "/Lotus/Powersuits/PaxDuviricus/PaxDuviricus", rank = 30 } }.powersuit
 	assert(kullervo.health == 1205)
 	assert(kullervo.shield == 0)
 	assert(kullervo.armor == 650)
 	assert(kullervo.power == 225)
 
 	-- Hildryn gains 500 shields.
-	local hildyrn = evaluate_build { powersuit = { name = "/Lotus/Powersuits/IronFrame/IronFrame", rank = 30 } }
+	local hildyrn = evaluate_build { powersuit = { name = "/Lotus/Powersuits/IronFrame/IronFrame", rank = 30 } }.powersuit
 	assert(hildyrn.health == 280)
 	assert(hildyrn.shield == 1780)
 	assert(hildyrn.power == 0)
 
 	-- Xaku gains 90 health, 90 shield, and 70 power.
-	local xaku = evaluate_build { powersuit = { name = "/Lotus/Powersuits/BrokenFrame/BrokenFrame", rank = 30 } }
+	local xaku = evaluate_build { powersuit = { name = "/Lotus/Powersuits/BrokenFrame/BrokenFrame", rank = 30 } }.powersuit
 	assert(xaku.health == 359)
 	assert(xaku.shield == 329)
 	assert(xaku.power == 230)
 
 	-- Lavos gains 200 health, 100 shield, and 100 armor.
-	local lavos = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Alchemist/Alchemist", rank = 30 } }
+	local lavos = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Alchemist/Alchemist", rank = 30 } }.powersuit
 	assert(lavos.health == 740)
 	assert(lavos.shield == 370)
 	assert(lavos.armor == 675)
 	assert(lavos.power == 0)
 
 	-- Valkyr only gains 50 shield.
-	local valkyr = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Berserker/Berserker", rank = 30 } }
+	local valkyr = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Berserker/Berserker", rank = 30 } }.powersuit
 	assert(valkyr.health == 370)
 	assert(valkyr.shield == 185)
 	assert(valkyr.power == 150)
@@ -64,8 +64,8 @@ end
 
 -- Test intermediate rank stats
 do
-	local base = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 0 } }
-	local r22 = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 22 } }
+	local base = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 0 } }.powersuit
+	local r22 = evaluate_build { powersuit = { name = "/Lotus/Powersuits/Excalibur/Excalibur", rank = 22 } }.powersuit
 	assert(r22.power == base.power + 35)
 	assert(r22.health == base.health + 80)
 	assert(r22.shield == base.shield + 70)
@@ -73,15 +73,15 @@ end
 
 -- Test mods increasing stats
 do
-	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 0 }}}}.health, 2520))
-	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 1 }}}}.health, 2730))
-	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 2 }}}}.health, 2940))
-	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 3 }}}}.health, 3150))
-	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 4 }}}}.health, 3360))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 0 }}}}.powersuit.health, 2520))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 1 }}}}.powersuit.health, 2730))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 2 }}}}.powersuit.health, 2940))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 3 }}}}.powersuit.health, 3150))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 4 }}}}.powersuit.health, 3360))
 end
 do
-	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 0 }}}}.health, 2502))
-	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 }}}}.health, 3464))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 0 }}}}.powersuit.health, 2502))
+	assert(about_equal(evaluate_build{ powersuit = { name = "/Lotus/Powersuits/Sandman/Sandman", rank = 30, mods = {{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 }}}}.powersuit.health, 3464))
 end
 do
 	assert(about_equal(evaluate_build{
@@ -93,7 +93,7 @@ do
 				{ name = "/Lotus/Upgrades/Mods/Warframe/DualStat/VigorMod", rank = 5 },
 			}
 		}
-	}.health, 5774))
+	}.powersuit.health, 5774))
 end
 
 -- Test set mods
@@ -107,7 +107,7 @@ do
 				{ name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModB", rank = 10 },
 			}
 		}
-	}
+	}.powersuit
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.health, 5313))
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.armor, 552))
 end
