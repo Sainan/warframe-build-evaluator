@@ -7,27 +7,17 @@ end
 
 local json = require "pluto:json"
 
-local ExportWarframes = json.decode(readfile("data/ExportWarframes_en.json")).ExportWarframes
-local ExportWeapons = json.decode(readfile("data/ExportWeapons_en.json")).ExportWeapons
+local function optimise_public_export(data)
+	local optimised = {}
+	for data as item do
+		optimised[item.uniqueName] = item
+	end
+	return optimised
+end
+
+local ExportWarframes = optimise_public_export(json.decode(readfile("data/ExportWarframes_en.json")).ExportWarframes)
+local ExportWeapons = optimise_public_export(json.decode(readfile("data/ExportWeapons_en.json")).ExportWeapons)
 local overframe_mods = json.decode(readfile("data/overframe_mods.json"))
-
-local function get_powersuit_data_from_public_export(uniqueName: string): ?table
-	for ExportWarframes as item do
-		if item.uniqueName == uniqueName then
-			return item
-		end
-	end
-	return nil
-end
-
-local function get_weapon_data_from_public_export(uniqueName: string): ?table
-	for ExportWeapons as item do
-		if item.uniqueName == uniqueName then
-			return item
-		end
-	end
-	return nil
-end
 
 local function get_num_mods_from_set(mods, set)
 	local n = 0
@@ -68,7 +58,7 @@ end
 export function parse_build(build)
 	local eval = {}
 	if build.powersuit then
-		local pe_data = get_powersuit_data_from_public_export(build.powersuit.name)
+		local pe_data = ExportWarframes[build.powersuit.name]
 		eval.powersuit = {
 			health = { base = pe_data.health },
 			shield = { base = pe_data.shield },
@@ -158,7 +148,7 @@ export function parse_build(build)
 		end
 	end
 	if build.melee then
-		local pe_data = get_weapon_data_from_public_export(build.melee.name)
+		local pe_data = ExportWeapons[build.melee.name]
 		eval.melee = {
 			crit_chance = { base = pe_data.criticalChance },
 		}
