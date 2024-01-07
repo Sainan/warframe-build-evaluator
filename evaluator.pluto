@@ -117,7 +117,7 @@ end
 export function parse_build(build)
 	local eval = {}
 	if build.powersuit then
-		local pe_data = ExportWarframes[build.powersuit.name]
+		local pe_data = ExportWarframes[build.powersuit.name] or error("Unknown powersuit: "..build.powersuit.name)
 		eval.powersuit = {
 			health = { base = pe_data.health },
 			shield = { base = pe_data.shield },
@@ -187,7 +187,7 @@ export function parse_build(build)
 
 		if build.powersuit.mods then
 			for build.powersuit.mods as mod do
-				local mod_data = overframe_mods[mod.name].data
+				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				local set_bonus = 1
 				if mod_data.ModSetValues then
 					local n = get_num_mods_from_set(build.powersuit.mods, mod_data.ModSet)
@@ -203,7 +203,7 @@ export function parse_build(build)
 			crit_chance = { base = pe_data.criticalChance },
 		}
 		for build.melee.mods as mod do
-			gear_applyMod(eval.melee, overframe_mods[mod.name].data, (mod.rank or 0) + 1)
+			gear_applyMod(eval.melee, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
 		end
 	end
 	return eval
