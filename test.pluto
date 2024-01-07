@@ -156,6 +156,18 @@ do
 	assert(about_equal(build_applyNoConditionals(build).melee.crit_chance * 100, 28))
 	assert(about_equal(build_applyAllConditionals(build).melee.crit_chance * 100, 70))
 end
+do
+	local build = parse_build{
+		powersuit = {
+			name = "/Lotus/Powersuits/Sandman/InarosPrime",
+			mods = {
+				{ name = "/Lotus/Upgrades/CosmeticEnhancers/Defensive/IncreaseMaxHealthOnHealthPickup" }
+			}
+		}
+	}
+	assert(about_equal(build_applyNoConditionals(build).powersuit.health, 2415))
+	assert(about_equal(build_applyAllConditionals(build).powersuit.health, 2615))
+end
 
 -- Archon Shards
 do

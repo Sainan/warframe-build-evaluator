@@ -55,16 +55,24 @@ local function stat_addConditional(stat, conditional)
 	stat.conditionals[#stat.conditionals + 1] = conditional
 end
 
+local function stat_getValue(stat)
+	return stat.base * (stat.stacking_multiply_base or 1) + (stat.add or 0)
+end
+
 local function stat_applyConditionals(stat, to_apply)
-	local stacking_multiply_carry = stat.stacking_multiply_base or 1
+	local tmp = {
+		base = stat.base,
+		stacking_multiply_base = stat.stacking_multiply_base,
+		add = stat.add,
+	}
 	if stat.conditionals then
 		for stat.conditionals as conditional do
 			if to_apply[conditional.type] ~= nil then
-				stacking_multiply_carry += conditional.value * to_apply[conditional.type]
+				stat_addOperation(tmp, conditional.operation, conditional.value * to_apply[conditional.type])
 			end
 		end
 	end
-	return stat.base * stacking_multiply_carry + (stat.add or 0)
+	return stat_getValue(tmp)
 end
 
 local function gear_getStat(gear, upgradeType): ?table
@@ -76,39 +84,48 @@ local function gear_getStat(gear, upgradeType): ?table
 end
 
 local function gear_applyMod(gear, mod, value_multiplier)
-	if mod.ConditionalUpgrades then
-		for mod.Upgrades as upgrade do
-			if stat := gear_getStat(gear, upgrade.UpgradeType) then
-				stat_addConditional(stat, {
-					type = mod.ConditionalUpgrades[1],
-					max_stacks = mod.MaxConditionalStacks,
-					operation = upgrade.OperationType,
-					value = upgrade.Value * value_multiplier,
-				})
-			end
-		end
-	else
-		for mod.Upgrades as upgrade do
-			if stat := gear_getStat(gear, upgrade.UpgradeType) then
-				if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
+	if mod.Upgrades then
+		if mod.ConditionalUpgrades then
+			for mod.Upgrades as upgrade do
+				if stat := gear_getStat(gear, upgrade.UpgradeType) then
 					stat_addConditional(stat, {
-						type = upgrade.ValidModifiers[1],
-						max_stacks = 1,
+						type = mod.ConditionalUpgrades[1],
+						max_stacks = mod.MaxConditionalStacks,
 						operation = upgrade.OperationType,
-						value = upgrade.Value * value_multiplier
+						value = upgrade.Value * value_multiplier,
 					})
-				elseif upgrade.SymbolFilter and upgrade.SymbolFilter ~= "" then
-					if upgrade.SymbolFilter ~= "CC_SLIDING_PVP" then
+				end
+			end
+		else
+			for mod.Upgrades as upgrade do
+				if stat := gear_getStat(gear, upgrade.UpgradeType) then
+					if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 						stat_addConditional(stat, {
-							type = upgrade.SymbolFilter,
+							type = upgrade.ValidModifiers[1],
 							max_stacks = 1,
 							operation = upgrade.OperationType,
 							value = upgrade.Value * value_multiplier
 						})
+					elseif upgrade.SymbolFilter and upgrade.SymbolFilter ~= "" then
+						if upgrade.SymbolFilter ~= "CC_SLIDING_PVP" then
+							stat_addConditional(stat, {
+								type = upgrade.SymbolFilter,
+								max_stacks = 1,
+								operation = upgrade.OperationType,
+								value = upgrade.Value * value_multiplier
+							})
+						end
+					else
+						stat_addOperation(stat, upgrade.OperationType, upgrade.Value * value_multiplier)
 					end
-				else
-					stat_addOperation(stat, upgrade.OperationType, upgrade.Value * value_multiplier)
 				end
+			end
+		end
+	end
+	if mod.SubUpgrades then
+		for mod.SubUpgrades as sub_upgrade do
+			if type(sub_upgrade) == "table" then
+				gear_applyMod(gear, sub_upgrade, value_multiplier)
 			end
 		end
 	end
