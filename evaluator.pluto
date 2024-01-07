@@ -19,6 +19,14 @@ local ExportWarframes = optimise_public_export(json.decode(readfile("data/Export
 local ExportWeapons = optimise_public_export(json.decode(readfile("data/ExportWeapons_en.json")).ExportWeapons)
 local overframe_mods = json.decode(readfile("data/overframe_mods.json"))
 
+local function add_archon_shard(name, upgrade, operation, value)
+	name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/"..name
+	overframe_mods[name] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value } } } }
+	overframe_mods[name.."Mythic"] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value * 1.5 } } } }
+end
+
+add_archon_shard("ArchonCrystalUpgradeWarframeHealthMax", "AVATAR_HEALTH_MAX", "ADD", 150)
+
 local function get_num_mods_from_set(mods, set)
 	local n = 0
 	for mods as mod do
@@ -30,10 +38,22 @@ local function get_num_mods_from_set(mods, set)
 end
 
 local function gear_getStat(gear, upgradeType): ?table
-	if upgradeType == "WEAPON_CRIT_CHANCE" then
-		return gear.crit_chance
+	return switch upgradeType do
+		case "AVATAR_HEALTH_MAX" -> gear.health
+		case "AVATAR_ARMOUR" -> gear.armor
+		case "WEAPON_CRIT_CHANCE" -> gear.crit_chance
 	end
-	return nil
+end
+
+local function stat_addOperation(stat, type, value)
+	if type == "ADD_BASE" then
+		stat.base += value
+	elseif type == "ADD" then
+		stat.add = (stat.add or 0) + value
+	else
+		assert(type == "STACKING_MULTIPLY")
+		stat.stacking_multiply_base = (stat.stacking_multiply_base or 1) + value
+	end
 end
 
 local function stat_addConditional(stat, conditional)
@@ -52,7 +72,7 @@ local function stat_applyConditionals(stat, to_apply)
 			end
 		end
 	end
-	return stat.base * stacking_multiply_carry
+	return stat.base * stacking_multiply_carry + (stat.add or 0)
 end
 
 export function parse_build(build)
@@ -127,7 +147,6 @@ export function parse_build(build)
 		end
 
 		if build.powersuit.mods then
-			local upgrades = {}
 			for build.powersuit.mods as mod do
 				local mod_data = overframe_mods[mod.name].data
 				local set_bonus = 1
@@ -136,14 +155,10 @@ export function parse_build(build)
 					set_bonus += mod_data.ModSetValues[n - 1]
 				end
 				for mod_data.Upgrades as upgrade do
-					upgrades[upgrade.UpgradeType] = (upgrades[upgrade.UpgradeType] or 0) + upgrade.Value * ((mod.rank or 0) + 1) * set_bonus
+					if stat := gear_getStat(eval.powersuit, upgrade.UpgradeType) then
+						stat_addOperation(stat, upgrade.OperationType, upgrade.Value * ((mod.rank or 0) + 1) * set_bonus)
+					end
 				end
-			end
-			if upgrades.AVATAR_HEALTH_MAX then
-				eval.powersuit.health.stacking_multiply_base = (eval.powersuit.health.stacking_multiply_base or 1) + upgrades.AVATAR_HEALTH_MAX
-			end
-			if upgrades.AVATAR_ARMOUR then
-				eval.powersuit.armor.stacking_multiply_base = (eval.powersuit.armor.stacking_multiply_base or 1) + upgrades.AVATAR_ARMOUR
 			end
 		end
 	end

@@ -156,3 +156,21 @@ do
 	assert(about_equal(build_applyNoConditionals(build).melee.crit_chance * 100, 28))
 	assert(about_equal(build_applyAllConditionals(build).melee.crit_chance * 100, 70))
 end
+
+-- Archon Shards
+do
+	assert(about_equal(evaluate_build{
+		powersuit = {
+			name = "/Lotus/Powersuits/Sandman/InarosPrime",
+			rank = 0,
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Warframe/AvatarHealthMaxMod", rank = 10 },
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMaxMythic" },
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMax" },
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMaxMythic" },
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMax" },
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMaxMythic" },
+			}
+		}
+	}.powersuit.health, 5405))
+end
