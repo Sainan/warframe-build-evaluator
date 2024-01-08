@@ -79,6 +79,8 @@ local function gear_getStat(gear, upgradeType): ?table
 	return switch upgradeType do
 		case "AVATAR_HEALTH_MAX" -> gear.health
 		case "AVATAR_ARMOUR" -> gear.armor
+		case "AVATAR_AURA_STRENGTH" -> gear.aura_strength
+		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> gear.aura_effectiveness
 		case "WEAPON_CRIT_CHANCE" -> gear.crit_chance
 	end
 end
@@ -140,6 +142,8 @@ export function parse_build(build)
 			shield = { base = pe_data.shield },
 			armor = { base = pe_data.armor },
 			power = { base = pe_data.power },
+			aura_strength = { base = 1 },
+			aura_effectiveness = { base = 1 },
 		}
 
 		local rank = build.powersuit.rank or 30
@@ -203,6 +207,7 @@ export function parse_build(build)
 		end
 
 		if build.powersuit.mods then
+			local aura_mod
 			for build.powersuit.mods as mod do
 				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				local set_bonus = 1
@@ -210,8 +215,19 @@ export function parse_build(build)
 					local n = get_num_mods_from_set(build.powersuit.mods, mod_data.ModSet)
 					set_bonus += mod_data.ModSetValues[n - 1]
 				end
-				gear_applyMod(eval.powersuit, mod_data, ((mod.rank or 0) + 1) * set_bonus)
+				local value_multiplier = ((mod.rank or 0) + 1) * set_bonus
+				if mod_data.ItemCompatibilityLocTag == "/Lotus/Language/Menu/CategoryAura" then
+					-- Save aura mod for later so aura strength can be applied
+					aura_mod = { data = mod_data, mult = value_multiplier }
+				else
+					gear_applyMod(eval.powersuit, mod_data, value_multiplier)
+				end
 			end
+			if aura_mod then
+				gear_applyMod(eval.powersuit, aura_mod.data, aura_mod.mult * stat_getValue(eval.powersuit.aura_strength) * stat_getValue(eval.powersuit.aura_effectiveness))
+			end
+			eval.powersuit.aura_strength = nil
+			eval.powersuit.aura_effectiveness = nil
 		end
 	end
 	if build.melee then

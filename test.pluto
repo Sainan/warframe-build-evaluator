@@ -169,6 +169,29 @@ do
 	assert(about_equal(build_applyAllConditionals(build).powersuit.health, 2615))
 end
 
+-- Aura + Coaction Drift
+do
+	assert(about_equal(evaluate_build{
+		powersuit = {
+			name = "/Lotus/Powersuits/Sandman/InarosPrime",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Aura/PlayerHealthAuraMod", rank = 5 }, -- Physique
+			}
+		}
+	}.powersuit.health, 2898))
+end
+do
+	assert(about_equal(evaluate_build{
+		powersuit = {
+			name = "/Lotus/Powersuits/Sandman/InarosPrime",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Aura/PlayerHealthAuraMod", rank = 5 }, -- Physique
+				{ name = "/Lotus/Upgrades/Mods/OrokinChallenge/OrokinChallengeModCollaboration", rank = 5 }, -- Coaction Drift
+			}
+		}
+	}.powersuit.health, 3053))
+end
+
 -- Archon Shards
 do
 	assert(about_equal(evaluate_build{
