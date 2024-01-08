@@ -220,7 +220,9 @@ export function parse_build(build)
 				local set_bonus = 1
 				if mod_data.ModSetValues then
 					local n = get_num_mods_from_set(build.powersuit.mods, mod_data.ModSet)
-					set_bonus += mod_data.ModSetValues[n - 1]
+					if n > 1 then
+						set_bonus += mod_data.ModSetValues[n - 1]
+					end
 				end
 				local value_multiplier = ((mod.rank or 0) + 1) * set_bonus
 				if mod_data.ItemCompatibilityLocTag == "/Lotus/Language/Menu/CategoryAura" then
