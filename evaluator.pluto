@@ -79,6 +79,8 @@ local function gear_getStat(gear, upgradeType): ?table
 	return switch upgradeType do
 		case "AVATAR_HEALTH_MAX" -> gear.health
 		case "AVATAR_ARMOUR" -> gear.armor
+		case "AVATAR_ABILITY_STRENGTH" -> gear.ability_strength
+		case "AVATAR_HEAL_RATE" -> gear.heal_rate
 		case "AVATAR_AURA_STRENGTH" -> gear.aura_strength
 		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> gear.aura_effectiveness
 		case "WEAPON_CRIT_CHANCE" -> gear.crit_chance
@@ -142,6 +144,8 @@ export function parse_build(build)
 			shield = { base = pe_data.shield },
 			armor = { base = pe_data.armor },
 			power = { base = pe_data.power },
+			ability_strength = { base = 1, stacking_multiply_base = 1 },
+			heal_rate = { base = 0 },
 			aura_strength = { base = 1 },
 			aura_effectiveness = { base = 1 },
 		}
@@ -157,8 +161,11 @@ export function parse_build(build)
 
 			case "/Lotus/Powersuits/Infestation/InfestationBaseSuit": -- Nidus
 				eval.powersuit.health.base += (rank + 2) // 3 * 10
-				eval.powersuit.armor.base += (rank + 1) // 3 * 10
-				eval.powersuit.power.base += rank // 3 * 5
+				eval.powersuit.armor.base += (rank + 4) // 6 * 20
+				eval.powersuit.ability_strength.stacking_multiply_base += (rank + 3) // 6 * 0.03
+				eval.powersuit.power.base += rank // 6 * 10
+				eval.powersuit.heal_rate.base = 5
+				eval.powersuit.heal_rate.base += rank // 6 * 2
 				break
 
 			case "/Lotus/Powersuits/PaxDuviricus/PaxDuviricusBaseSuit": -- Kullervo
