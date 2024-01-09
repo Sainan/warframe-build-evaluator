@@ -295,7 +295,15 @@ export function parse_build(build)
 	end
 	if build.melee?.mods then
 		for build.melee.mods as mod do
-			eval_applyMod(eval, "melee", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
+			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+			local set_bonus = 1
+			if mod_data.ModSetValues then
+				local n = get_num_mods_from_set(build.melee.mods, mod_data.ModSet)
+				if n > 1 then
+					set_bonus += mod_data.ModSetValues[n - 1]
+				end
+			end
+			eval_applyMod(eval, "melee", mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
 		end
 	end
 	return eval

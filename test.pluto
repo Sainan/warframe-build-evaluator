@@ -113,6 +113,18 @@ do
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.health, 5313))
 	assert(about_equal(inaros_with_umbral_vitality_and_fiber.armor, 552))
 end
+do
+	local build = evaluate_build{
+		melee = {
+			name = "/Lotus/Powersuits/Pacifist/PacifistFistPrime",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Sets/Sacrifice/MeleeSacrificeModA", rank = 10 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Sacrifice/MeleeSacrificeModB", rank = 10 },
+			}
+		}
+	}
+	assert(about_equal(build.melee.crit_chance * 100, 187.5))
+end
 
 -- Conditionals
 do
