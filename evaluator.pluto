@@ -161,7 +161,7 @@ end
 
 export function parse_build(build)
 	local eval = {}
-	if build.powersuit then
+	if build.powersuit?.name then
 		local pe_data = ExportWarframes[build.powersuit.name] or error("Unknown powersuit: "..build.powersuit.name)
 		eval.powersuit = {
 			health = { base = pe_data.health },
@@ -237,19 +237,19 @@ export function parse_build(build)
 				eval.powersuit.power.base += rank // 3 * 5
 		end
 	end
-	if build.primary then
+	if build.primary?.name then
 		local pe_data = ExportWeapons[build.primary.name]
 		eval.primary = {
 			crit_chance = { base = pe_data.criticalChance },
 		}
 	end
-	if build.secondary then
+	if build.secondary?.name then
 		local pe_data = ExportWeapons[build.secondary.name]
 		eval.secondary = {
 			crit_chance = { base = pe_data.criticalChance },
 		}
 	end
-	if build.melee then
+	if build.melee?.name then
 		local pe_data = ExportWeapons[build.melee.name]
 		eval.melee = {
 			crit_chance = { base = pe_data.criticalChance },
@@ -280,8 +280,10 @@ export function parse_build(build)
 				eval_applyMod(eval, "powersuit", aura_mod.data, aura_mod.rank, aura_mod.mult * stat_getValue(eval.powersuit.aura_strength) * stat_getValue(eval.powersuit.aura_effectiveness))
 			end
 		end
-		eval.powersuit.aura_strength = nil
-		eval.powersuit.aura_effectiveness = nil
+		if eval.powersuit then
+			eval.powersuit.aura_strength = nil
+			eval.powersuit.aura_effectiveness = nil
+		end
 	end
 	if build.primary?.mods then
 		for build.primary.mods as mod do
