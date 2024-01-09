@@ -244,8 +244,10 @@ export function parse_build(build)
 		eval.melee = {
 			crit_chance = { base = pe_data.criticalChance },
 		}
-		for build.melee.mods as mod do
-			gear_applyMod(eval.melee, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
+		if build.melee.mods then
+			for build.melee.mods as mod do
+				gear_applyMod(eval.melee, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
+			end
 		end
 	end
 	return eval
