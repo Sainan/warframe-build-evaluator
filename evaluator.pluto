@@ -30,7 +30,7 @@ add_archon_shard("ArchonCrystalUpgradeWarframeHealthMax", "AVATAR_HEALTH_MAX", "
 local function get_num_mods_from_set(mods, set)
 	local n = 0
 	for mods as mod do
-		if overframe_mods[mod.name].data.ModSet == set then
+		if (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data.ModSet == set then
 			++n
 		end
 	end
