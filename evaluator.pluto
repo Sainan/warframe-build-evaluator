@@ -84,14 +84,24 @@ local function gear_getStat(gear, upgradeType): ?table
 		case "AVATAR_AURA_STRENGTH" -> gear.aura_strength
 		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> gear.aura_effectiveness
 		case "WEAPON_CRIT_CHANCE" -> gear.crit_chance
+		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> gear.combo_duration
 	end
 end
 
-local function gear_applyMod(gear, mod, value_multiplier)
+local function fusion_level_to_rank(qa)
+	return switch qa do
+		case "QA_VERY_HIGH" -> 10
+		case "QA_HIGH" -> 5
+		case "QA_MEDIUM" -> 3
+		default -> 0
+	end
+end
+
+local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 1)
 	if mod.Upgrades then
 		if mod.ConditionalUpgrades then
 			for mod.Upgrades as upgrade do
-				if stat := gear_getStat(gear, upgrade.UpgradeType) then
+				if stat := gear_getStat(eval[gear_name], upgrade.UpgradeType) then
 					stat_addConditional(stat, {
 						type = mod.ConditionalUpgrades[1],
 						max_stacks = mod.MaxConditionalStacks,
@@ -102,7 +112,7 @@ local function gear_applyMod(gear, mod, value_multiplier)
 			end
 		else
 			for mod.Upgrades as upgrade do
-				if stat := gear_getStat(gear, upgrade.UpgradeType) then
+				if stat := gear_getStat(eval[gear_name], upgrade.UpgradeType) then
 					if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 						stat_addConditional(stat, {
 							type = upgrade.ValidModifiers[1],
@@ -126,10 +136,24 @@ local function gear_applyMod(gear, mod, value_multiplier)
 			end
 		end
 	end
+	if mod.ExtraUpgrades and rank >= fusion_level_to_rank(mod.ExtraUpgradeFusionLevel) then
+		for mod.ExtraUpgrades as upgrade do
+			if upgrade.ValidType ~= "" then
+				assert(upgrade.ValidType == "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon")
+				if stat := gear_getStat(eval.melee, upgrade.UpgradeType) then
+					stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+				end
+			else
+				if stat := gear_getStat(eval[gear_name], upgrade.UpgradeType) then
+					stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+				end
+			end
+		end
+	end
 	if mod.SubUpgrades then
 		for mod.SubUpgrades as sub_upgrade do
 			if type(sub_upgrade) == "table" then
-				gear_applyMod(gear, sub_upgrade, value_multiplier)
+				eval_applyMod(eval, gear_name, sub_upgrade, rank, value_multiplier)
 			end
 		end
 	end
@@ -229,6 +253,7 @@ export function parse_build(build)
 		local pe_data = ExportWeapons[build.melee.name]
 		eval.melee = {
 			crit_chance = { base = pe_data.criticalChance },
+			combo_duration = { base = pe_data.comboDuration },
 		}
 	end
 	if build.powersuit then
@@ -246,13 +271,13 @@ export function parse_build(build)
 				local value_multiplier = ((mod.rank or 0) + 1) * set_bonus
 				if mod_data.ItemCompatibilityLocTag == "/Lotus/Language/Menu/CategoryAura" then
 					-- Save aura mod for later so aura strength can be applied
-					aura_mod = { data = mod_data, mult = value_multiplier }
+					aura_mod = { data = mod_data, rank = mod.rank, mult = value_multiplier }
 				else
-					gear_applyMod(eval.powersuit, mod_data, value_multiplier)
+					eval_applyMod(eval, "powersuit", mod_data, rank, value_multiplier)
 				end
 			end
 			if aura_mod then
-				gear_applyMod(eval.powersuit, aura_mod.data, aura_mod.mult * stat_getValue(eval.powersuit.aura_strength) * stat_getValue(eval.powersuit.aura_effectiveness))
+				eval_applyMod(eval, "powersuit", aura_mod.data, aura_mod.rank, aura_mod.mult * stat_getValue(eval.powersuit.aura_strength) * stat_getValue(eval.powersuit.aura_effectiveness))
 			end
 		end
 		eval.powersuit.aura_strength = nil
@@ -260,17 +285,17 @@ export function parse_build(build)
 	end
 	if build.primary?.mods then
 		for build.primary.mods as mod do
-			gear_applyMod(eval.primary, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
+			eval_applyMod(eval, "primary", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if build.secondary?.mods then
 		for build.secondary.mods as mod do
-			gear_applyMod(eval.secondary, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
+			eval_applyMod(eval, "secondary", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if build.melee?.mods then
 		for build.melee.mods as mod do
-			gear_applyMod(eval.melee, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
+			eval_applyMod(eval, "melee", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	return eval

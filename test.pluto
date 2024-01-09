@@ -194,6 +194,22 @@ do
 	}.powersuit.health, 3053))
 end
 
+-- Gear may have mods that affect other gear
+do
+	local build = {
+		primary = {
+			name = "/Lotus/Weapons/Tenno/LongGuns/RubicoPrime/RubicoPrimeWeapon",
+			mods = {
+				{ name = "/Lotus/Upgrades/CosmeticEnhancers/Offensive/PrimaryDamageOnMeleeKill", rank = 5 }, -- Primary Dexterity
+			}
+		},
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Swords/PrimeKatana/PrimeNikana"
+		}
+	}
+	assert(evaluate_build(build).melee.combo_duration == 12.5)
+end
+
 -- Archon Shards
 do
 	assert(about_equal(evaluate_build{
