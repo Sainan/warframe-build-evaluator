@@ -235,9 +235,9 @@ export function parse_build(build)
 			if aura_mod then
 				gear_applyMod(eval.powersuit, aura_mod.data, aura_mod.mult * stat_getValue(eval.powersuit.aura_strength) * stat_getValue(eval.powersuit.aura_effectiveness))
 			end
-			eval.powersuit.aura_strength = nil
-			eval.powersuit.aura_effectiveness = nil
 		end
+		eval.powersuit.aura_strength = nil
+		eval.powersuit.aura_effectiveness = nil
 	end
 	if build.melee then
 		local pe_data = ExportWeapons[build.melee.name]
