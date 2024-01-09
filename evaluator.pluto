@@ -239,6 +239,28 @@ export function parse_build(build)
 		eval.powersuit.aura_strength = nil
 		eval.powersuit.aura_effectiveness = nil
 	end
+	if build.primary then
+		local pe_data = ExportWeapons[build.primary.name]
+		eval.primary = {
+			crit_chance = { base = pe_data.criticalChance },
+		}
+		if build.primary.mods then
+			for build.primary.mods as mod do
+				gear_applyMod(eval.primary, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
+			end
+		end
+	end
+	if build.secondary then
+		local pe_data = ExportWeapons[build.secondary.name]
+		eval.secondary = {
+			crit_chance = { base = pe_data.criticalChance },
+		}
+		if build.secondary.mods then
+			for build.secondary.mods as mod do
+				gear_applyMod(eval.secondary, (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, (mod.rank or 0) + 1)
+			end
+		end
+	end
 	if build.melee then
 		local pe_data = ExportWeapons[build.melee.name]
 		eval.melee = {
