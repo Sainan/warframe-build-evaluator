@@ -75,20 +75,22 @@ local function stat_applyConditionals(stat, to_apply)
 	return stat_getValue(tmp)
 end
 
-local function gear_getStat(gear, upgradeType): ?table
+local function gear_getStats(gear, upgradeType): table
 	return switch upgradeType do
-		case "AVATAR_HEALTH_MAX" -> gear.health
-		case "AVATAR_ARMOUR" -> gear.armor
-		case "AVATAR_ABILITY_STRENGTH" -> gear.ability_strength
-		case "AVATAR_HEAL_RATE" -> gear.heal_rate
-		case "AVATAR_AURA_STRENGTH" -> gear.aura_strength
-		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> gear.aura_effectiveness
-		case "WEAPON_CRIT_CHANCE" -> gear.crit_chance
-		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> gear.combo_duration
+		case "AVATAR_HEALTH_MAX" -> { "health" }
+		case "AVATAR_ARMOUR" -> { "armor" }
+		case "AVATAR_ABILITY_STRENGTH" -> { "ability_strength" }
+		case "AVATAR_HEAL_RATE" -> { "heal_rate" }
+		case "AVATAR_AURA_STRENGTH" -> { "aura_strength" }
+		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> { "aura_effectiveness" }
+		case "WEAPON_CRIT_CHANCE" -> { "crit_chance" }
+		case "WEAPON_MELEE_DAMAGE" -> { "dmg_impact", "dmg_puncture", "dmg_slash", "dmg_heat", "dmg_cold", "dmg_electricity", "dmg_toxin", "dmg_blast", "dmg_radiation", "dmg_gas", "dmg_magnetic", "dmg_viral", "dmg_corrosive" }
+		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> { "combo_duration" }
+		default -> --[[print("Silently ignoring "..upgradeType) or]] {}
 	end
 end
 
-local function fusion_level_to_rank(qa)
+local function fusion_level_to_rank(qa): int
 	return switch qa do
 		case "QA_VERY_HIGH" -> 10
 		case "QA_HIGH" -> 5
@@ -101,18 +103,24 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 	if mod.Upgrades then
 		if mod.ConditionalUpgrades then
 			for mod.Upgrades as upgrade do
-				if stat := gear_getStat(eval[gear_name], upgrade.UpgradeType) then
-					stat_addConditional(stat, {
-						type = mod.ConditionalUpgrades[1],
-						max_stacks = mod.MaxConditionalStacks,
-						operation = upgrade.OperationType,
-						value = upgrade.Value * value_multiplier,
-					})
+				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
+				for stats as stat_name do
+					local stat = eval[gear_name][stat_name]
+					if stat then
+						stat_addConditional(stat, {
+							type = mod.ConditionalUpgrades[1],
+							max_stacks = mod.MaxConditionalStacks,
+							operation = upgrade.OperationType,
+							value = upgrade.Value * value_multiplier,
+						})
+					end
 				end
 			end
 		else
 			for mod.Upgrades as upgrade do
-				if stat := gear_getStat(eval[gear_name], upgrade.UpgradeType) then
+				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
+				for stats as stat_name do
+					local stat = eval[gear_name][stat_name]
 					if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 						stat_addConditional(stat, {
 							type = upgrade.ValidModifiers[1],
@@ -140,12 +148,18 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 		for mod.ExtraUpgrades as upgrade do
 			if upgrade.ValidType ~= "" then
 				assert(upgrade.ValidType == "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon")
-				if stat := gear_getStat(eval.melee, upgrade.UpgradeType) then
-					stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+				local stats = gear_getStats(eval.melee, upgrade.UpgradeType)
+				for stats as stat_name do
+					if stat := eval.melee[stat_name] then
+						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+					end
 				end
 			else
-				if stat := gear_getStat(eval[gear_name], upgrade.UpgradeType) then
-					stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
+				for stats as stat_name do
+					if stat := eval[gear_name][stat_name] then
+						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+					end
 				end
 			end
 		end
@@ -240,18 +254,57 @@ export function parse_build(build)
 	if build.primary?.name then
 		local pe_data = ExportWeapons[build.primary.name]
 		eval.primary = {
+			dmg_impact = { base = pe_data.damagePerShot[1] },
+			dmg_puncture = { base = pe_data.damagePerShot[2] },
+			dmg_slash = { base = pe_data.damagePerShot[3] },
+			dmg_heat = { base = pe_data.damagePerShot[4] },
+			dmg_cold = { base = pe_data.damagePerShot[5] },
+			dmg_electricity = { base = pe_data.damagePerShot[6] },
+			dmg_toxin = { base = pe_data.damagePerShot[7] },
+			dmg_blast = { base = pe_data.damagePerShot[8] },
+			dmg_radiation = { base = pe_data.damagePerShot[9] },
+			dmg_gas = { base = pe_data.damagePerShot[10] },
+			dmg_magnetic = { base = pe_data.damagePerShot[11] },
+			dmg_viral = { base = pe_data.damagePerShot[12] },
+			dmg_corrosive = { base = pe_data.damagePerShot[13] },
 			crit_chance = { base = pe_data.criticalChance },
 		}
 	end
 	if build.secondary?.name then
 		local pe_data = ExportWeapons[build.secondary.name]
 		eval.secondary = {
+			dmg_impact = { base = pe_data.damagePerShot[1] },
+			dmg_puncture = { base = pe_data.damagePerShot[2] },
+			dmg_slash = { base = pe_data.damagePerShot[3] },
+			dmg_heat = { base = pe_data.damagePerShot[4] },
+			dmg_cold = { base = pe_data.damagePerShot[5] },
+			dmg_electricity = { base = pe_data.damagePerShot[6] },
+			dmg_toxin = { base = pe_data.damagePerShot[7] },
+			dmg_blast = { base = pe_data.damagePerShot[8] },
+			dmg_radiation = { base = pe_data.damagePerShot[9] },
+			dmg_gas = { base = pe_data.damagePerShot[10] },
+			dmg_magnetic = { base = pe_data.damagePerShot[11] },
+			dmg_viral = { base = pe_data.damagePerShot[12] },
+			dmg_corrosive = { base = pe_data.damagePerShot[13] },
 			crit_chance = { base = pe_data.criticalChance },
 		}
 	end
 	if build.melee?.name then
 		local pe_data = ExportWeapons[build.melee.name]
 		eval.melee = {
+			dmg_impact = { base = pe_data.damagePerShot[1] },
+			dmg_puncture = { base = pe_data.damagePerShot[2] },
+			dmg_slash = { base = pe_data.damagePerShot[3] },
+			dmg_heat = { base = pe_data.damagePerShot[4] },
+			dmg_cold = { base = pe_data.damagePerShot[5] },
+			dmg_electricity = { base = pe_data.damagePerShot[6] },
+			dmg_toxin = { base = pe_data.damagePerShot[7] },
+			dmg_blast = { base = pe_data.damagePerShot[8] },
+			dmg_radiation = { base = pe_data.damagePerShot[9] },
+			dmg_gas = { base = pe_data.damagePerShot[10] },
+			dmg_magnetic = { base = pe_data.damagePerShot[11] },
+			dmg_viral = { base = pe_data.damagePerShot[12] },
+			dmg_corrosive = { base = pe_data.damagePerShot[13] },
 			crit_chance = { base = pe_data.criticalChance },
 			combo_duration = { base = pe_data.comboDuration },
 		}
