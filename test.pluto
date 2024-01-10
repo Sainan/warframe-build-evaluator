@@ -206,11 +206,24 @@ do
 	}.powersuit.health, 3053))
 end
 
+-- Basic Damage Increase
+do
+	local build = evaluate_build{
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Melee/Expert/WeaponMeleeDamageModExpert", rank = 10 },
+			}
+		}
+	}
+	assert(about_equal(build.melee.dmg_impact, 37.1))
+	assert(about_equal(build.melee.dmg_puncture, 333.9))
+end
+
 -- Gear may have mods that affect other gear
 do
 	local build = {
 		primary = {
-			name = "/Lotus/Weapons/Tenno/LongGuns/RubicoPrime/RubicoPrimeWeapon",
 			mods = {
 				{ name = "/Lotus/Upgrades/CosmeticEnhancers/Offensive/PrimaryDamageOnMeleeKill", rank = 5 }, -- Primary Dexterity
 			}
@@ -220,6 +233,20 @@ do
 		}
 	}
 	assert(evaluate_build(build).melee.combo_duration == 12.5)
+end
+do
+	local build = parse_build{
+		powersuit = {
+			mods = {
+				{ name = "/Lotus/Upgrades/CosmeticEnhancers/Offensive/GolemArcaneMeleeDamageOnCrit", rank = 5 }, -- Arcane Fury
+			}
+		},
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger",
+		}
+	}
+	assert(about_equal(build_applyAllConditionals(build).melee.dmg_impact, 39.2))
+	assert(about_equal(build_applyAllConditionals(build).melee.dmg_puncture, 352.8))
 end
 
 -- Archon Shards
@@ -238,18 +265,4 @@ do
 			}
 		}
 	}.powersuit.health, 5405))
-end
-
--- Basic Damage Increase
-do
-	local build = evaluate_build{
-		melee = {
-			name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger",
-			mods = {
-				{ name = "/Lotus/Upgrades/Mods/Melee/Expert/WeaponMeleeDamageModExpert", rank = 10 },
-			}
-		}
-	}
-	assert(about_equal(build.melee.dmg_impact, 37.1))
-	assert(about_equal(build.melee.dmg_puncture, 333.9))
 end

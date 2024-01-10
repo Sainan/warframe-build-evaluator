@@ -75,6 +75,13 @@ local function stat_applyConditionals(stat, to_apply)
 	return stat_getValue(tmp)
 end
 
+local function upgrade_type_to_gear_name(upgradeType): ?string
+	return switch upgradeType do
+		case "WEAPON_MELEE_DAMAGE" -> "melee"
+		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> "melee"
+	end
+end
+
 local function gear_getStats(gear, upgradeType): table
 	return switch upgradeType do
 		case "AVATAR_HEALTH_MAX" -> { "health" }
@@ -104,15 +111,33 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 		if mod.ConditionalUpgrades then
 			for mod.Upgrades as upgrade do
 				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
+				local applied = false
 				for stats as stat_name do
-					local stat = eval[gear_name][stat_name]
+					local stat = eval[gear_name]?[stat_name]
 					if stat then
+						applied = true
 						stat_addConditional(stat, {
 							type = mod.ConditionalUpgrades[1],
-							max_stacks = mod.MaxConditionalStacks,
+							proc_chance = mod.UpgradeChance or 1,
+							max_stacks = mod.MaxConditionalStacks or 1,
 							operation = upgrade.OperationType,
 							value = upgrade.Value * value_multiplier,
 						})
+					end
+				end
+				if not applied then
+					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) then
+						local upgrade_stats = gear_getStats(eval[upgrade_gear_name], upgrade.UpgradeType)
+						for upgrade_stats as upgrade_stat_name do
+							stat = eval[upgrade_gear_name][upgrade_stat_name]
+							stat_addConditional(stat, {
+								type = mod.ConditionalUpgrades[1],
+								proc_chance = mod.UpgradeChance or 1,
+								max_stacks = mod.MaxConditionalStacks or 1,
+								operation = upgrade.OperationType,
+								value = upgrade.Value * value_multiplier,
+							})
+						end
 					end
 				end
 			end
@@ -372,6 +397,7 @@ export function build_getConditionals(build)
 				for stat.conditionals as conditional do
 					if not conditionals[conditional.type] then
 						conditionals[conditional.type] = {
+							proc_chance = conditional.proc_chance,
 							max_stacks = conditional.max_stacks
 						}
 					end
