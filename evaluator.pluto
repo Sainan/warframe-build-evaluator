@@ -413,6 +413,9 @@ export function build_applyConditionals(build, to_apply)
 	end
 	if flat_build.powersuit then
 		flat_build.powersuit.power_health = flat_build.powersuit.power * flat_build.powersuit.power_to_health_efficiency
+		flat_build.powersuit.armor_damage_reduction = flat_build.powersuit.armor / (flat_build.powersuit.armor + 300)
+		flat_build.powersuit.effective_health = flat_build.powersuit.health / (1 - flat_build.powersuit.armor_damage_reduction)
+		flat_build.powersuit.effective_health_incl_power = flat_build.powersuit.effective_health + flat_build.powersuit.power_health / (1 - flat_build.powersuit.armor_damage_reduction)
 	end
 	return flat_build
 end
@@ -431,12 +434,4 @@ end
 
 export function evaluate_build(build)
 	return build_applyNoConditionals(parse_build(build))
-end
-
-export function armor_to_damage_reduction(armor)
-	return armor / (armor + 300)
-end
-
-export function calculate_effective_health(health, damage_reduction)
-	return health / (1 - damage_reduction)
 end
