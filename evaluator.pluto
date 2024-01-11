@@ -136,25 +136,27 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 			for pairs(mod.Upgrades) as upgrade do
 				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
 				for pairs(stats) as stat_name do
-					local stat = eval[gear_name][stat_name]
-					if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
-						stat_addConditional(stat, {
-							type = upgrade.ValidModifiers[1],
-							max_stacks = 1,
-							operation = upgrade.OperationType,
-							value = upgrade.Value * value_multiplier
-						})
-					elseif upgrade.SymbolFilter and upgrade.SymbolFilter ~= "" then
-						if upgrade.SymbolFilter ~= "CC_SLIDING_PVP" then
+					local stat = eval[gear_name]?[stat_name]
+					if stat then
+						if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 							stat_addConditional(stat, {
-								type = upgrade.SymbolFilter,
+								type = upgrade.ValidModifiers[1],
 								max_stacks = 1,
 								operation = upgrade.OperationType,
 								value = upgrade.Value * value_multiplier
 							})
+						elseif upgrade.SymbolFilter and upgrade.SymbolFilter ~= "" then
+							if upgrade.SymbolFilter ~= "CC_SLIDING_PVP" then
+								stat_addConditional(stat, {
+									type = upgrade.SymbolFilter,
+									max_stacks = 1,
+									operation = upgrade.OperationType,
+									value = upgrade.Value * value_multiplier
+								})
+							end
+						else
+							stat_addOperation(stat, upgrade.OperationType, upgrade.Value * value_multiplier)
 						end
-					else
-						stat_addOperation(stat, upgrade.OperationType, upgrade.Value * value_multiplier)
 					end
 				end
 			end
