@@ -81,6 +81,7 @@ local function gear_getStats(gear, upgradeType): table
 		case "AVATAR_HEAL_RATE" -> { "heal_rate" }
 		case "AVATAR_AURA_STRENGTH" -> { "aura_strength" }
 		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> { "aura_effectiveness" }
+		case "GAMEPLAY_POWER_TO_HEALTH_ON_DEATH" -> { "power_to_health_efficiency" }
 		case "WEAPON_CRIT_CHANCE" -> { "crit_chance" }
 		case "WEAPON_MELEE_DAMAGE" -> { "dmg_impact", "dmg_puncture", "dmg_slash", "dmg_heat", "dmg_cold", "dmg_electricity", "dmg_toxin", "dmg_blast", "dmg_radiation", "dmg_gas", "dmg_magnetic", "dmg_viral", "dmg_corrosive" }
 		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> { "combo_duration" }
@@ -204,6 +205,7 @@ export function parse_build(build)
 			heal_rate = { base = 0 },
 			aura_strength = { base = 1 },
 			aura_effectiveness = { base = 1 },
+			power_to_health_efficiency = { base = 0 },
 		}
 
 		local rank = build.powersuit.rank or 30
@@ -408,6 +410,9 @@ export function build_applyConditionals(build, to_apply)
 		for stat_name, stat in pairs(gear) do
 			flat_build[gear_name][stat_name] = stat_applyConditionals(stat, to_apply)
 		end
+	end
+	if flat_build.powersuit then
+		flat_build.powersuit.power_health = flat_build.powersuit.power * flat_build.powersuit.power_to_health_efficiency
 	end
 	return flat_build
 end
