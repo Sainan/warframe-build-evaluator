@@ -10,3 +10,9 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install pluto
       - run: pluto test.pluto
+      - run: plutoc -o evaluator.lua evaluator.pluto
+      - run: plutoc -o test.lua test.pluto
+      - uses: actions/upload-artifact@v3
+        with:
+          name: "Lua VM-compatible Bytecode"
+          path: '*.lua'
