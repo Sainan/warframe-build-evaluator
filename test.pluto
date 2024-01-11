@@ -98,34 +98,6 @@ do
 	}.powersuit.health, 5774))
 end
 
--- Test set mods
-do
-	local inaros_with_umbral_vitality_and_fiber = evaluate_build{
-		powersuit = {
-			name = "/Lotus/Powersuits/Sandman/Sandman",
-			rank = 30,
-			mods = {
-				{ name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModA", rank = 10 },
-				{ name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModB", rank = 10 },
-			}
-		}
-	}.powersuit
-	assert(about_equal(inaros_with_umbral_vitality_and_fiber.health, 5313))
-	assert(about_equal(inaros_with_umbral_vitality_and_fiber.armor, 552))
-end
-do
-	local build = evaluate_build{
-		melee = {
-			name = "/Lotus/Powersuits/Pacifist/PacifistFistPrime",
-			mods = {
-				{ name = "/Lotus/Upgrades/Mods/Sets/Sacrifice/MeleeSacrificeModA", rank = 10 },
-				{ name = "/Lotus/Upgrades/Mods/Sets/Sacrifice/MeleeSacrificeModB", rank = 10 },
-			}
-		}
-	}
-	assert(about_equal(build.melee.crit_chance * 100, 187.5))
-end
-
 -- Conditionals
 do
 	local build = parse_build{
@@ -181,6 +153,69 @@ do
 	}
 	assert(about_equal(build_applyNoConditionals(build).powersuit.health, 2415))
 	assert(about_equal(build_applyAllConditionals(build).powersuit.health, 2615))
+end
+
+-- Test set mods
+do
+	local inaros_with_umbral_vitality_and_fiber = evaluate_build{
+		powersuit = {
+			name = "/Lotus/Powersuits/Sandman/Sandman",
+			rank = 30,
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModA", rank = 10 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Umbra/WarframeUmbraModB", rank = 10 },
+			}
+		}
+	}.powersuit
+	assert(about_equal(inaros_with_umbral_vitality_and_fiber.health, 5313))
+	assert(about_equal(inaros_with_umbral_vitality_and_fiber.armor, 552))
+end
+do
+	local build = evaluate_build{
+		melee = {
+			name = "/Lotus/Powersuits/Pacifist/PacifistFistPrime",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Sets/Sacrifice/MeleeSacrificeModA", rank = 10 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Sacrifice/MeleeSacrificeModB", rank = 10 },
+			}
+		}
+	}
+	assert(about_equal(build.melee.crit_chance * 100, 187.5))
+end
+do
+	local build = parse_build{
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Melee/Event/ComboCritChanceMod", rank = 10 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/MeleeGladiatorViceMod", rank = 5 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/MeleeGladiatorRushMod", rank = 5 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/MeleeGladiatorMightMod", rank = 5 },
+			}
+		}
+	}
+	assert(about_equal(build_applyAllConditionals(build).melee.crit_chance * 100, 87))
+end
+do
+	local build = parse_build{
+		powersuit = {
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/WarframeGladiatorResolveMod", rank = 5 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/WarframeGladiatorFinesseMod", rank = 5 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/WarframeGladiatorAegisMod", rank = 5 },
+			}
+		},
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Melee/Event/ComboCritChanceMod", rank = 10 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/MeleeGladiatorViceMod", rank = 5 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/MeleeGladiatorRushMod", rank = 5 },
+				{ name = "/Lotus/Upgrades/Mods/Sets/Gladiator/MeleeGladiatorMightMod", rank = 5 },
+			}
+		}
+	}
+	assert(about_equal(build_applyAllConditionals(build).melee.crit_chance * 100, 120))
 end
 
 -- Aura + Coaction Drift

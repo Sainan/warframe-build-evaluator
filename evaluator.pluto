@@ -9,6 +9,9 @@ end
 if not overframe_mods then
 	overframe_mods = dofile("data/overframe_mods.json.lua")
 end
+if not overframe_modsets then
+	overframe_modsets = dofile("data/overframe_modsets.json.lua")
+end
 
 local function add_archon_shard(name, upgrade, operation, value)
 	name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/"..name
@@ -73,6 +76,14 @@ local function upgrade_type_to_gear_name(upgradeType): ?string
 	end
 end
 
+local function valid_type_to_gear_name(validType): ?string
+	return switch validType do
+		case "/Lotus/Weapons/Tenno/LotusLongGun" -> "primary"
+		case "/Lotus/Weapons/Tenno/LotusPistol" -> "secondary"
+		case "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon" -> "melee"
+	end
+end
+
 local function gear_getStats(gear, upgradeType): table
 	return switch upgradeType do
 		case "AVATAR_HEALTH_MAX" -> { "health" }
@@ -98,7 +109,7 @@ local function fusion_level_to_rank(qa): int
 	end
 end
 
-local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 1)
+local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_multiplier = 1)
 	if mod.Upgrades then
 		if mod.ConditionalUpgrades then
 			for pairs(mod.Upgrades) as upgrade do
@@ -118,7 +129,7 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 					end
 				end
 				if not applied then
-					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) then
+					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) or valid_type_to_gear_name(upgrade.ValidType) then
 						local upgrade_stats = gear_getStats(eval[upgrade_gear_name], upgrade.UpgradeType)
 						for pairs(upgrade_stats) as upgrade_stat_name do
 							stat = eval[upgrade_gear_name][upgrade_stat_name]
@@ -329,6 +340,7 @@ export function parse_build(build)
 			combo_duration = { base = pe_data.comboDuration },
 		}
 	end
+	local sets = {}
 	if build.powersuit then
 		if build.powersuit.mods then
 			local aura_mod
@@ -340,6 +352,8 @@ export function parse_build(build)
 					if n > 1 then
 						set_bonus += mod_data.ModSetValues[n - 1]
 					end
+				elseif mod_data.ModSet then
+					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 				end
 				local value_multiplier = ((mod.rank or 0) + 1) * set_bonus
 				if mod_data.ItemCompatibilityLocTag == "/Lotus/Language/Menu/CategoryAura" then
@@ -360,12 +374,20 @@ export function parse_build(build)
 	end
 	if build.primary?.mods then
 		for pairs(build.primary.mods) as mod do
-			eval_applyMod(eval, "primary", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
+			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+			if mod_data.ModSet then
+				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+			end
+			eval_applyMod(eval, "primary", mod_data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if build.secondary?.mods then
 		for pairs(build.secondary.mods) as mod do
-			eval_applyMod(eval, "secondary", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
+			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+			if mod_data.ModSet then
+				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+			end
+			eval_applyMod(eval, "secondary", mod_data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if build.melee?.mods then
@@ -377,9 +399,14 @@ export function parse_build(build)
 				if n > 1 then
 					set_bonus += mod_data.ModSetValues[n - 1]
 				end
+			elseif mod_data.ModSet then
+				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 			end
 			eval_applyMod(eval, "melee", mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
 		end
+	end
+	for set, n in pairs(sets) do
+		eval_applyMod(eval, nil, overframe_modsets[set].data, n, n)
 	end
 	return eval
 end
