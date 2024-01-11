@@ -20,7 +20,7 @@ add_archon_shard("ArchonCrystalUpgradeWarframeHealthMax", "AVATAR_HEALTH_MAX", "
 
 local function get_num_mods_from_set(mods, set)
 	local n = 0
-	for mods as mod do
+	for pairs(mods) as mod do
 		if (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data.ModSet == set then
 			++n
 		end
@@ -57,7 +57,7 @@ local function stat_applyConditionals(stat, to_apply)
 		add = stat.add,
 	}
 	if stat.conditionals then
-		for stat.conditionals as conditional do
+		for pairs(stat.conditionals) as conditional do
 			if to_apply[conditional.type] ~= nil then
 				stat_addOperation(tmp, conditional.operation, conditional.value * to_apply[conditional.type])
 			end
@@ -100,10 +100,10 @@ end
 local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 1)
 	if mod.Upgrades then
 		if mod.ConditionalUpgrades then
-			for mod.Upgrades as upgrade do
+			for pairs(mod.Upgrades) as upgrade do
 				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
 				local applied = false
-				for stats as stat_name do
+				for pairs(stats) as stat_name do
 					local stat = eval[gear_name]?[stat_name]
 					if stat then
 						applied = true
@@ -119,7 +119,7 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 				if not applied then
 					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) then
 						local upgrade_stats = gear_getStats(eval[upgrade_gear_name], upgrade.UpgradeType)
-						for upgrade_stats as upgrade_stat_name do
+						for pairs(upgrade_stats) as upgrade_stat_name do
 							stat = eval[upgrade_gear_name][upgrade_stat_name]
 							stat_addConditional(stat, {
 								type = mod.ConditionalUpgrades[1],
@@ -133,9 +133,9 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 				end
 			end
 		else
-			for mod.Upgrades as upgrade do
+			for pairs(mod.Upgrades) as upgrade do
 				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
-				for stats as stat_name do
+				for pairs(stats) as stat_name do
 					local stat = eval[gear_name][stat_name]
 					if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 						stat_addConditional(stat, {
@@ -161,18 +161,18 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 		end
 	end
 	if mod.ExtraUpgrades and rank >= fusion_level_to_rank(mod.ExtraUpgradeFusionLevel) then
-		for mod.ExtraUpgrades as upgrade do
+		for pairs(mod.ExtraUpgrades) as upgrade do
 			if upgrade.ValidType ~= "" then
 				assert(upgrade.ValidType == "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon")
 				local stats = gear_getStats(eval.melee, upgrade.UpgradeType)
-				for stats as stat_name do
+				for pairs(stats) as stat_name do
 					if stat := eval.melee[stat_name] then
 						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
 					end
 				end
 			else
 				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
-				for stats as stat_name do
+				for pairs(stats) as stat_name do
 					if stat := eval[gear_name][stat_name] then
 						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
 					end
@@ -181,7 +181,7 @@ local function eval_applyMod(eval, gear_name, mod, rank = 0, value_multiplier = 
 		end
 	end
 	if mod.SubUpgrades then
-		for mod.SubUpgrades as sub_upgrade do
+		for pairs(mod.SubUpgrades) as sub_upgrade do
 			if type(sub_upgrade) == "table" then
 				eval_applyMod(eval, gear_name, sub_upgrade, rank, value_multiplier)
 			end
@@ -328,7 +328,7 @@ export function parse_build(build)
 	if build.powersuit then
 		if build.powersuit.mods then
 			local aura_mod
-			for build.powersuit.mods as mod do
+			for pairs(build.powersuit.mods) as mod do
 				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				local set_bonus = 1
 				if mod_data.ModSetValues then
@@ -355,17 +355,17 @@ export function parse_build(build)
 		end
 	end
 	if build.primary?.mods then
-		for build.primary.mods as mod do
+		for pairs(build.primary.mods) as mod do
 			eval_applyMod(eval, "primary", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if build.secondary?.mods then
-		for build.secondary.mods as mod do
+		for pairs(build.secondary.mods) as mod do
 			eval_applyMod(eval, "secondary", (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if build.melee?.mods then
-		for build.melee.mods as mod do
+		for pairs(build.melee.mods) as mod do
 			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 			local set_bonus = 1
 			if mod_data.ModSetValues then
@@ -382,10 +382,10 @@ end
 
 export function build_getConditionals(build)
 	local conditionals = {}
-	for build as gear do
-		for gear as stat do
+	for pairs(build) as gear do
+		for pairs(gear) as stat do
 			if stat.conditionals then
-				for stat.conditionals as conditional do
+				for pairs(stat.conditionals) as conditional do
 					if not conditionals[conditional.type] then
 						conditionals[conditional.type] = {
 							proc_chance = conditional.proc_chance,
@@ -401,9 +401,9 @@ end
 
 export function build_applyConditionals(build, to_apply)
 	local flat_build = {}
-	for gear_name, gear in build do
+	for gear_name, gear in pairs(build) do
 		flat_build[gear_name] = {}
-		for stat_name, stat in gear do
+		for stat_name, stat in pairs(gear) do
 			flat_build[gear_name][stat_name] = stat_applyConditionals(stat, to_apply)
 		end
 	end
@@ -416,7 +416,7 @@ end
 
 export function build_applyAllConditionals(build)
 	local to_apply = {}
-	for conditional_type, conditional in build_getConditionals(build) do
+	for conditional_type, conditional in pairs(build_getConditionals(build)) do
 		to_apply[conditional_type] = conditional.max_stacks
 	end
 	return build_applyConditionals(build, to_apply)
