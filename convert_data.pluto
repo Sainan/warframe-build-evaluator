@@ -1,0 +1,29 @@
+pluto_use export = false
+
+local json = require "pluto:json"
+
+local function readfile(path)
+	local f <close> = io.open(path, "rb")
+	return f:read("*a")
+end
+
+local function writefile(path, contents)
+	local f <close> = io.open(path, "wb")
+	f:write(contents)
+end
+
+local function optimise_public_export(data)
+	local optimised = {}
+	for data as item do
+		optimised[item.uniqueName] = item
+	end
+	return optimised
+end
+
+local function export(data)
+	return string.dump(load("return "..exportvar(data)))
+end
+
+writefile("data/ExportWarframes_en.json.lua", export(optimise_public_export(json.decode(readfile("data/ExportWarframes_en.json")).ExportWarframes)))
+writefile("data/ExportWeapons_en.json.lua", export(optimise_public_export(json.decode(readfile("data/ExportWeapons_en.json")).ExportWeapons)))
+writefile("data/overframe_mods.json.lua", export(json.decode(readfile("data/overframe_mods.json"))))

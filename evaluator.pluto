@@ -1,23 +1,14 @@
 -- @pluto_warnings enable-non-portable-bytecode
 
-local function readfile(path)
-	local f <close> = io.open(path, "rb")
-	return f:read("*a")
+if not ExportWarframes then
+	ExportWarframes = dofile("data/ExportWarframes_en.json.lua")
 end
-
-local json = require "pluto:json"
-
-local function optimise_public_export(data)
-	local optimised = {}
-	for data as item do
-		optimised[item.uniqueName] = item
-	end
-	return optimised
+if not ExportWeapons then
+	ExportWeapons = dofile("data/ExportWeapons_en.json.lua")
 end
-
-local ExportWarframes = optimise_public_export(json.decode(readfile("data/ExportWarframes_en.json")).ExportWarframes)
-local ExportWeapons = optimise_public_export(json.decode(readfile("data/ExportWeapons_en.json")).ExportWeapons)
-local overframe_mods = json.decode(readfile("data/overframe_mods.json"))
+if not overframe_mods then
+	overframe_mods = dofile("data/overframe_mods.json.lua")
+end
 
 local function add_archon_shard(name, upgrade, operation, value)
 	name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/"..name
