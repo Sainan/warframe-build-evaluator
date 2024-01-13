@@ -10,7 +10,7 @@ fetch("../data/ExportUpgrades_en.json")
 .then(data => {
 	let datalist = document.getElementById("datalist-mods");
 	data.ExportUpgrades.forEach(item => {
-		if (item.compatName == "WARFRAME"
+		if ((item.compatName == "WARFRAME" || item.compatName == "AURA")
 			&& item.uniqueName.substr(0, 39) != "/Lotus/Upgrades/Mods/Warframe/Beginner/"
 			&& item.uniqueName.substr(0, 43) != "/Lotus/Upgrades/Mods/Warframe/Intermediate/"
 			)
