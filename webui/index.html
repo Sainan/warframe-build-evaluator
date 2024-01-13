@@ -1,31 +1,51 @@
+<title>Warframe Build Evaluator Web UI</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="https://wasm.pluto.do/out/libpluto/0.8.1/libpluto.js"></script>
 <script src="https://pluto-lang.org/PlutoScript/plutoscript.js"></script>
 
-<h1>Warframe Build Evaluator Web UI</h1>
-<p>Brought to you by the makers of "graphic design is my passion."</p>
-<hr>
+<style>
+	@media (min-width: 520px)
+	{
+		.grid
+		{
+			display: flex;
+		}
 
-<div id="gear-powersuit">
-	<h2>Warframe</h2>
-	<input list="datalist-powersuits" />
-	<p><b>Mods:</b></p>
-	<ul>
-		<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Aura, if you so want.)</li>
-		<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Exilus, if you so want.)</li>
-		<li data-repeat-count="9"><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /></li>
-		<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 1, if you so want.)</li>
-		<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 2, if you so want.)</li>
-	</ul>
-	<p><b>Archon Shards:</b></p>
-	<ul>
-		<li data-repeat-count="4">
-			<input list="datalist-crystals" />
-		</li>
-	</ul>
+		.grid-item
+		{
+			width: 50%;
+		}
+	}
+</style>
+
+<div class="grid">
+	<div class="grid-item">
+		<div id="gear-powersuit">
+			<h2>Warframe</h2>
+			<input list="datalist-powersuits" />
+			<p><b>Mods:</b></p>
+			<ul>
+				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Aura, if you so want.)</li>
+				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Exilus, if you so want.)</li>
+				<li data-repeat-count="9"><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /></li>
+				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 1, if you so want.)</li>
+				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 2, if you so want.)</li>
+			</ul>
+			<p><b>Archon Shards:</b></p>
+			<ul>
+				<li data-repeat-count="4">
+					<input list="datalist-crystals" />
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="grid-item">
+		<h2>Evaluation</h2>
+		<pre style="tab-size:4">Loading, please wait...</pre>
+	</div>
 </div>
-
-<hr>
-<pre style="tab-size:4">Loading, please wait...</pre>
 
 <datalist id="datalist-powersuits"></datalist>
 <datalist id="datalist-mods"></datalist>

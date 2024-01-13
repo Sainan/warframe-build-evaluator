@@ -86,6 +86,6 @@ function evaluate_build()
 	}
 
 	pluto_invoke("evaluate_build", inbuild).then(data => pluto_invoke("dumpvar", data)).then(data => {
-		document.querySelector("pre").textContent = data == "{}" ? "Evaluator is ready." : data;
+		document.querySelector("pre").textContent = data;
 	});
 }
