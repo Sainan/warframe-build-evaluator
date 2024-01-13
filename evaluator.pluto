@@ -132,14 +132,15 @@ local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_mult
 					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) or valid_type_to_gear_name(upgrade.ValidType) then
 						local upgrade_stats = gear_getStats(eval[upgrade_gear_name], upgrade.UpgradeType)
 						for pairs(upgrade_stats) as upgrade_stat_name do
-							stat = eval[upgrade_gear_name][upgrade_stat_name]
-							stat_addConditional(stat, {
-								type = mod.ConditionalUpgrades[1],
-								proc_chance = mod.UpgradeChance or 1,
-								max_stacks = mod.MaxConditionalStacks or 1,
-								operation = upgrade.OperationType,
-								value = upgrade.Value * value_multiplier,
-							})
+							if stat := eval[upgrade_gear_name]?[upgrade_stat_name] then
+								stat_addConditional(stat, {
+									type = mod.ConditionalUpgrades[1],
+									proc_chance = mod.UpgradeChance or 1,
+									max_stacks = mod.MaxConditionalStacks or 1,
+									operation = upgrade.OperationType,
+									value = upgrade.Value * value_multiplier,
+								})
+							end
 						end
 					end
 				end
