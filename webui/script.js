@@ -42,7 +42,7 @@ function add_datalist_option(datalist, key, value)
 
 function get_key(input)
 {
-	return document.getElementById(input.getAttribute("list")).querySelector("[value='"+input.value+"']")?.getAttribute("data-key");
+	return document.getElementById(input.getAttribute("list")).querySelector("[value='"+input.value.split("'").join("\\'")+"']")?.getAttribute("data-key");
 }
 
 function ready_to_evaluate()
