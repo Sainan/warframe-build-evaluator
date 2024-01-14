@@ -17,6 +17,17 @@ do
 	ExportWarframes = optimise_public_export(ExportWarframes)
 
 	ExportWeapons = optimise_public_export(js_invoke("fetch_data_json", "ExportWeapons_en").ExportWeapons)
+	for ExportWeapons as item do
+		if item.productCategory == "LongGuns" then
+			js_invoke("add_datalist_option", "datalist-primaries", item.uniqueName, item.name)
+		elseif item.productCategory == "Pistols" then
+			js_invoke("add_datalist_option", "datalist-secondaries", item.uniqueName, item.name)
+		elseif item.productCategory == "Melee" then
+			js_invoke("add_datalist_option", "datalist-melees", item.uniqueName, item.name)
+		end
+	end
+	ExportWeapons = optimise_public_export(ExportWeapons)
+
 	overframe_mods = js_invoke("fetch_data_json", "overframe_mods")
 	overframe_modsets = js_invoke("fetch_data_json", "overframe_modsets")
 end

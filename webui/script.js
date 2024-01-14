@@ -8,17 +8,30 @@ document.querySelectorAll("[data-repeat-count]").forEach(elm => {
 fetch("../data/ExportUpgrades_en.json")
 .then(response => response.json())
 .then(data => {
-	let datalist = document.getElementById("datalist-mods");
 	data.ExportUpgrades.forEach(item => {
-		if ((item.compatName == "WARFRAME" || item.compatName == "AURA")
-			&& item.uniqueName.substr(0, 39) != "/Lotus/Upgrades/Mods/Warframe/Beginner/"
-			&& item.uniqueName.substr(0, 43) != "/Lotus/Upgrades/Mods/Warframe/Intermediate/"
+		if (!item.uniqueName.includes("/Beginner/") && !item.uniqueName.includes("/Intermediate/")
+			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/WeaponMeleeDamageOnHeavyKillMod"
 			)
 		{
 			let option = document.createElement("option");
 			option.setAttribute("data-key", item.uniqueName);
 			option.value = item.name;
-			datalist.appendChild(option);
+			if (item.compatName == "WARFRAME" || item.compatName == "AURA")
+			{
+				document.getElementById("datalist-powersuit-mods").appendChild(option);
+			}
+			else if (item.compatName == "PRIMARY")
+			{
+				document.getElementById("datalist-primary-mods").appendChild(option);
+			}
+			else if (item.compatName == "Pistol")
+			{
+				document.getElementById("datalist-secondary-mods").appendChild(option);
+			}
+			else if (item.compatName == "Melee")
+			{
+				document.getElementById("datalist-melee-mods").appendChild(option);
+			}
 		}
 	});
 });
@@ -48,9 +61,34 @@ function get_key(input)
 function ready_to_evaluate()
 {
 	evaluate_build();
-	document.querySelectorAll("input[list='datalist-powersuits'], input[list='datalist-mods'], input[list='datalist-crystals'], input[type='number']").forEach(elm => {
+	document.querySelectorAll("input[list], input[type='number']").forEach(elm => {
 		elm.oninput = () => evaluate_build();
 	})
+}
+
+function tally_mods(elm)
+{
+	let mods = [];
+	elm.forEach(input => {
+		let key = get_key(input);
+		if (key)
+		{
+			pluto_invoke("get_max_rank", key).then(max_rank => {
+				let rank_input = input.parentNode.querySelector("input[type='number']");
+				if (rank_input.valueAsNumber > max_rank)
+				{
+					rank_input.valueAsNumber = max_rank;
+					evaluate_build();
+				}
+			});
+			mods.push({ name: key, rank: input.parentNode.querySelector("input[type='number']").valueAsNumber });
+		}
+		else if (input.value != "")
+		{
+			console.log("Ignoring unknown mod:", input.value);
+		}
+	});
+	return mods;
 }
 
 function evaluate_build()
@@ -60,27 +98,11 @@ function evaluate_build()
 	let powersuit = get_key(document.querySelector("input[list='datalist-powersuits']"));
 	if (powersuit)
 	{
-		inbuild.powersuit = { name: powersuit, mods: [] };
-		document.querySelectorAll("#gear-powersuit input[list='datalist-mods']").forEach(input => {
-			let key = get_key(input);
-			if (key)
-			{
-				pluto_invoke("get_max_rank", key).then(max_rank => {
-					let rank_input = input.parentNode.querySelector("input[type='number']");
-					if (rank_input.valueAsNumber > max_rank)
-					{
-						rank_input.valueAsNumber = max_rank;
-						evaluate_build();
-					}
-				});
-				inbuild.powersuit.mods.push({ name: key, rank: input.parentNode.querySelector("input[type='number']").valueAsNumber });
-			}
-			else if (input.value != "")
-			{
-				console.log("Ignoring unknown mod:", input.value);
-			}
-		});
-		document.querySelectorAll("#gear-powersuit input[list='datalist-crystals']").forEach(input => {
+		inbuild.powersuit = {
+			name: powersuit,
+			mods: tally_mods(document.querySelectorAll("input[list='datalist-powersuit-mods']"))
+		};
+		document.querySelectorAll("input[list='datalist-crystals']").forEach(input => {
 			let key = get_key(input);
 			if (key)
 			{
@@ -91,6 +113,33 @@ function evaluate_build()
 				console.log("Ignoring unknown crystal:", input.value);
 			}
 		});
+	}
+
+	let primary = get_key(document.querySelector("input[list='datalist-primaries']"));
+	if (primary)
+	{
+		inbuild.primary = {
+			name: primary,
+			mods: tally_mods(document.querySelectorAll("input[list='datalist-primary-mods']"))
+		};
+	}
+
+	let secondary = get_key(document.querySelector("input[list='datalist-secondaries']"));
+	if (secondary)
+	{
+		inbuild.secondary = {
+			name: secondary,
+			mods: tally_mods(document.querySelectorAll("input[list='datalist-secondary-mods']"))
+		};
+	}
+
+	let melee = get_key(document.querySelector("input[list='datalist-melees']"));
+	if (melee)
+	{
+		inbuild.melee = {
+			name: melee,
+			mods: tally_mods(document.querySelectorAll("input[list='datalist-melee-mods']"))
+		};
 	}
 
 	pluto_invoke("evaluate_build", inbuild).then(data => pluto_invoke("dumpvar", data)).then(data => {

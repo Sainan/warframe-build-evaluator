@@ -6,7 +6,19 @@
 <script src="https://pluto-lang.org/PlutoScript/plutoscript.js"></script>
 
 <style>
-	@media (min-width: 520px)
+	body
+	{
+		margin: 0;
+		padding: 0;
+		font-family: sans-serif;
+	}
+
+	.grid-item
+	{
+		padding: 8px 16px;
+	}
+
+	@media (min-width: 1069px)
 	{
 		.grid
 		{
@@ -16,30 +28,51 @@
 		.grid-item
 		{
 			width: 50%;
+			height: calc(100vh - 16px);
+			overflow: auto;
 		}
 	}
 </style>
 
 <div class="grid">
 	<div class="grid-item">
-		<div id="gear-powersuit">
-			<h2>Warframe</h2>
-			<input list="datalist-powersuits" />
-			<p><b>Mods:</b></p>
-			<ul>
-				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Aura, if you so want.)</li>
-				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Exilus, if you so want.)</li>
-				<li data-repeat-count="9"><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /></li>
-				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 1, if you so want.)</li>
-				<li><input list="datalist-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 2, if you so want.)</li>
-			</ul>
-			<p><b>Archon Shards:</b></p>
-			<ul>
-				<li data-repeat-count="4">
-					<input list="datalist-crystals" />
-				</li>
-			</ul>
-		</div>
+		<h2>Warframe</h2>
+		<input list="datalist-powersuits" />
+		<p><b>Mods:</b></p>
+		<ul>
+			<li><input list="datalist-powersuit-mods" />R<input type="number" value="0" min="0" max="10" /> (Aura, if you so want.)</li>
+			<li><input list="datalist-powersuit-mods" />R<input type="number" value="0" min="0" max="10" /> (Exilus, if you so want.)</li>
+			<li data-repeat-count="9"><input list="datalist-powersuit-mods" />R<input type="number" value="0" min="0" max="10" /></li>
+			<li><input list="datalist-powersuit-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 1, if you so want.)</li>
+			<li><input list="datalist-powersuit-mods" />R<input type="number" value="0" min="0" max="10" /> (Arcane 2, if you so want.)</li>
+		</ul>
+		<p><b>Archon Shards:</b></p>
+		<ul>
+			<li data-repeat-count="4">
+				<input list="datalist-crystals" />
+			</li>
+		</ul>
+
+		<h2>Primary</h2>
+		<input list="datalist-primaries" />
+		<p><b>Mods:</b></p>
+		<ul>
+			<li data-repeat-count="9"><input list="datalist-primary-mods" />R<input type="number" value="0" min="0" max="10" /></li>
+		</ul>
+
+		<h2>Secondary</h2>
+		<input list="datalist-secondaries" />
+		<p><b>Mods:</b></p>
+		<ul>
+			<li data-repeat-count="9"><input list="datalist-secondary-mods" />R<input type="number" value="0" min="0" max="10" /></li>
+		</ul>
+
+		<h2>Melee</h2>
+		<input list="datalist-melees" />
+		<p><b>Mods:</b></p>
+		<ul>
+			<li data-repeat-count="9"><input list="datalist-melee-mods" />R<input type="number" value="0" min="0" max="10" /></li>
+		</ul>
 	</div>
 	<div class="grid-item">
 		<h2>Evaluation</h2>
@@ -48,7 +81,13 @@
 </div>
 
 <datalist id="datalist-powersuits"></datalist>
-<datalist id="datalist-mods"></datalist>
+<datalist id="datalist-powersuit-mods"></datalist>
+<datalist id="datalist-primaries"></datalist>
+<datalist id="datalist-primary-mods"></datalist>
+<datalist id="datalist-secondaries"></datalist>
+<datalist id="datalist-secondary-mods"></datalist>
+<datalist id="datalist-melees"></datalist>
+<datalist id="datalist-melee-mods"></datalist>
 <datalist id="datalist-crystals">
 	<option data-key="/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeMeleeCritDamage" value="Red: +25% Melee crit DMG"></option>
 	<option data-key="/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradePrimaryStatusChance" value="Red: +25% Primary status %"></option>
