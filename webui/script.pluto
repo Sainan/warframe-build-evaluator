@@ -21,7 +21,12 @@ do
 	overframe_modsets = js_invoke("fetch_data_json", "overframe_modsets")
 end
 
-evaluator = dofile("/evaluator.pluto")
+local evaluator = dofile("/evaluator.pluto")
+
+function get_max_rank(mod)
+	local qa = overframe_mods[mod].data.FusionLimit
+	return qa ? evaluator.fusion_level_to_rank(overframe_mods[mod].data.FusionLimit) : 5
+end
 
 parse_build = evaluator.parse_build
 evaluate_build = evaluator.evaluate_build -- TODO: Remove this once conditionals are implemented

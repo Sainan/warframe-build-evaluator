@@ -100,7 +100,7 @@ local function gear_getStats(gear, upgradeType): table
 	end
 end
 
-local function fusion_level_to_rank(qa): int
+export function fusion_level_to_rank(qa): int
 	return switch qa do
 		case "QA_VERY_HIGH" -> 10
 		case "QA_HIGH" -> 5

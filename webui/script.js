@@ -65,6 +65,14 @@ function evaluate_build()
 			let key = get_key(input);
 			if (key)
 			{
+				pluto_invoke("get_max_rank", key).then(max_rank => {
+					let rank_input = input.parentNode.querySelector("input[type='number']");
+					if (rank_input.valueAsNumber > max_rank)
+					{
+						rank_input.valueAsNumber = max_rank;
+						evaluate_build();
+					}
+				});
 				inbuild.powersuit.mods.push({ name: key, rank: input.parentNode.querySelector("input[type='number']").valueAsNumber });
 			}
 			else if (input.value != "")
