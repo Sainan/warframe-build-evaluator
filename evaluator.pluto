@@ -114,14 +114,14 @@ export function get_fusion_limit(mod): int
 	return mod_data.FusionLimit ? fusion_level_to_rank(mod_data.FusionLimit) : 5
 end
 
-local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_multiplier = 1)
+local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_multiplier = 1)
 	if mod.Upgrades then
 		if mod.ConditionalUpgrades then
 			for pairs(mod.Upgrades) as upgrade do
-				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
+				local stats = gear_getStats(build[gear_name], upgrade.UpgradeType)
 				local applied = false
 				for pairs(stats) as stat_name do
-					local stat = eval[gear_name]?[stat_name]
+					local stat = build[gear_name]?[stat_name]
 					if stat then
 						applied = true
 						stat_addConditional(stat, {
@@ -135,9 +135,9 @@ local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_mult
 				end
 				if not applied then
 					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) or valid_type_to_gear_name(upgrade.ValidType) then
-						local upgrade_stats = gear_getStats(eval[upgrade_gear_name], upgrade.UpgradeType)
+						local upgrade_stats = gear_getStats(build[upgrade_gear_name], upgrade.UpgradeType)
 						for pairs(upgrade_stats) as upgrade_stat_name do
-							if stat := eval[upgrade_gear_name]?[upgrade_stat_name] then
+							if stat := build[upgrade_gear_name]?[upgrade_stat_name] then
 								stat_addConditional(stat, {
 									type = mod.ConditionalUpgrades[1],
 									proc_chance = mod.UpgradeChance or 1,
@@ -152,9 +152,9 @@ local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_mult
 			end
 		else
 			for pairs(mod.Upgrades) as upgrade do
-				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
+				local stats = gear_getStats(build[gear_name], upgrade.UpgradeType)
 				for pairs(stats) as stat_name do
-					local stat = eval[gear_name]?[stat_name]
+					local stat = build[gear_name]?[stat_name]
 					if stat then
 						if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 							stat_addConditional(stat, {
@@ -184,16 +184,16 @@ local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_mult
 		for pairs(mod.ExtraUpgrades) as upgrade do
 			if upgrade.ValidType ~= "" then
 				assert(upgrade.ValidType == "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon")
-				local stats = gear_getStats(eval.melee, upgrade.UpgradeType)
+				local stats = gear_getStats(build.melee, upgrade.UpgradeType)
 				for pairs(stats) as stat_name do
-					if stat := eval.melee[stat_name] then
+					if stat := build.melee[stat_name] then
 						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
 					end
 				end
 			else
-				local stats = gear_getStats(eval[gear_name], upgrade.UpgradeType)
+				local stats = gear_getStats(build[gear_name], upgrade.UpgradeType)
 				for pairs(stats) as stat_name do
-					if stat := eval[gear_name][stat_name] then
+					if stat := build[gear_name][stat_name] then
 						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
 					end
 				end
@@ -203,17 +203,17 @@ local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_mult
 	if mod.SubUpgrades then
 		for pairs(mod.SubUpgrades) as sub_upgrade do
 			if type(sub_upgrade) == "table" then
-				eval_applyMod(eval, gear_name, sub_upgrade, rank, value_multiplier)
+				build_applyMod(build, gear_name, sub_upgrade, rank, value_multiplier)
 			end
 		end
 	end
 end
 
-export function parse_build(build)
-	local eval = {}
-	if build.powersuit?.name then
-		local pe_data = ExportWarframes[build.powersuit.name] or error("Unknown powersuit: "..build.powersuit.name)
-		eval.powersuit = {
+export function parse_build(inbuild)
+	local build = {}
+	if inbuild.powersuit?.name then
+		local pe_data = ExportWarframes[inbuild.powersuit.name] or error("Unknown powersuit: "..inbuild.powersuit.name)
+		build.powersuit = {
 			health = { base = pe_data.health },
 			shield = { base = pe_data.shield },
 			armor = { base = pe_data.armor },
@@ -225,72 +225,72 @@ export function parse_build(build)
 			power_to_health_efficiency = { base = 0 },
 		}
 
-		local rank = build.powersuit.rank or 30
+		local rank = inbuild.powersuit.rank or 30
 		switch pe_data.parentName do
 			case "/Lotus/Powersuits/Sandman/SandmanBaseSuit": -- Inaros
 			case "/Lotus/Powersuits/Devourer/DevourerBaseSuit": -- Grendel
-				eval.powersuit.health.base += (rank + 2) // 3 * 10
-				eval.powersuit.health.base += (rank + 1) // 3 * 10
-				eval.powersuit.power.base += rank // 3 * 5
+				build.powersuit.health.base += (rank + 2) // 3 * 10
+				build.powersuit.health.base += (rank + 1) // 3 * 10
+				build.powersuit.power.base += rank // 3 * 5
 				break
 
 			case "/Lotus/Powersuits/Infestation/InfestationBaseSuit": -- Nidus
-				eval.powersuit.health.base += (rank + 2) // 3 * 10
-				eval.powersuit.armor.base += (rank + 4) // 6 * 20
-				eval.powersuit.ability_strength.stacking_multiply_base += (rank + 3) // 6 * 0.03
-				eval.powersuit.power.base += rank // 6 * 10
-				eval.powersuit.heal_rate.base = 5
-				eval.powersuit.heal_rate.base += rank // 6 * 2
+				build.powersuit.health.base += (rank + 2) // 3 * 10
+				build.powersuit.armor.base += (rank + 4) // 6 * 20
+				build.powersuit.ability_strength.stacking_multiply_base += (rank + 3) // 6 * 0.03
+				build.powersuit.power.base += rank // 6 * 10
+				build.powersuit.heal_rate.base = 5
+				build.powersuit.heal_rate.base += rank // 6 * 2
 				break
 
 			case "/Lotus/Powersuits/PaxDuviricus/PaxDuviricusBaseSuit": -- Kullervo
-				eval.powersuit.health.base += (rank + 2) // 3 * 20
-				eval.powersuit.armor.base += (rank + 1) // 3 * 10
-				eval.powersuit.power.base += rank // 3 * 5
+				build.powersuit.health.base += (rank + 2) // 3 * 20
+				build.powersuit.armor.base += (rank + 1) // 3 * 10
+				build.powersuit.power.base += rank // 3 * 5
 				break
 
 			case "/Lotus/Powersuits/IronFrame/IronFrameBaseSuit": -- Hildryn
-				eval.powersuit.health.base += (rank + 2) // 3 * 10
-				eval.powersuit.shield.base += (rank + 1) // 3 * 25
-				eval.powersuit.shield.base += rank // 3 * 25
+				build.powersuit.health.base += (rank + 2) // 3 * 10
+				build.powersuit.shield.base += (rank + 1) // 3 * 25
+				build.powersuit.shield.base += rank // 3 * 25
 				break
 
 			case "/Lotus/Powersuits/BrokenFrame/BrokenFrameBaseSuit": -- Xaku
-				eval.powersuit.health.base += (rank + 2) // 3 * 9
-				eval.powersuit.shield.base += (rank + 1) // 3 * 9
-				eval.powersuit.power.base += rank // 3 * 7
+				build.powersuit.health.base += (rank + 2) // 3 * 9
+				build.powersuit.shield.base += (rank + 1) // 3 * 9
+				build.powersuit.power.base += rank // 3 * 7
 				break
 
 			case "/Lotus/Powersuits/Alchemist/AlchemistBaseSuit": -- Lavos
-				eval.powersuit.health.base += (rank + 2) // 3 * 20
-				eval.powersuit.shield.base += (rank + 1) // 3 * 10
-				eval.powersuit.armor.base += rank // 3 * 10
+				build.powersuit.health.base += (rank + 2) // 3 * 20
+				build.powersuit.shield.base += (rank + 1) // 3 * 10
+				build.powersuit.armor.base += rank // 3 * 10
 				break
 
 			case "/Lotus/Powersuits/Berserker/BerserkerBaseSuit": -- Valkyr
-				eval.powersuit.health.base += (rank + 2) // 3 * 10
-				eval.powersuit.shield.base += (rank + 1) // 3 * 5
-				eval.powersuit.power.base += rank // 3 * 5
+				build.powersuit.health.base += (rank + 2) // 3 * 10
+				build.powersuit.shield.base += (rank + 1) // 3 * 5
+				build.powersuit.power.base += rank // 3 * 5
 				break
 
 			case "/Lotus/Powersuits/Pacifist/PacifistBaseSuit": -- Baruuk
 			case "/Lotus/Powersuits/Garuda/GarudaBaseSuit": -- Garuda
 			case "/Lotus/Powersuits/Wisp/WispBaseSuit": -- Wisp
 			case "/Lotus/Powersuits/Yareli/YareliBaseSuit": -- Yareli
-				eval.powersuit.health.base += (rank + 2) // 3 * 10
-				eval.powersuit.shield.base += (rank + 1) // 3 * 10
-				eval.powersuit.power.base += rank // 3 * 10
+				build.powersuit.health.base += (rank + 2) // 3 * 10
+				build.powersuit.shield.base += (rank + 1) // 3 * 10
+				build.powersuit.power.base += rank // 3 * 10
 				break
 
 			default:
-				eval.powersuit.health.base += (rank + 2) // 3 * 10
-				eval.powersuit.shield.base += (rank + 1) // 3 * 10
-				eval.powersuit.power.base += rank // 3 * 5
+				build.powersuit.health.base += (rank + 2) // 3 * 10
+				build.powersuit.shield.base += (rank + 1) // 3 * 10
+				build.powersuit.power.base += rank // 3 * 5
 		end
 	end
-	if build.primary?.name then
-		local pe_data = ExportWeapons[build.primary.name]
-		eval.primary = {
+	if inbuild.primary?.name then
+		local pe_data = ExportWeapons[inbuild.primary.name]
+		build.primary = {
 			dmg_impact = { base = pe_data.damagePerShot[1] },
 			dmg_puncture = { base = pe_data.damagePerShot[2] },
 			dmg_slash = { base = pe_data.damagePerShot[3] },
@@ -307,9 +307,9 @@ export function parse_build(build)
 			crit_chance = { base = pe_data.criticalChance },
 		}
 	end
-	if build.secondary?.name then
-		local pe_data = ExportWeapons[build.secondary.name]
-		eval.secondary = {
+	if inbuild.secondary?.name then
+		local pe_data = ExportWeapons[inbuild.secondary.name]
+		build.secondary = {
 			dmg_impact = { base = pe_data.damagePerShot[1] },
 			dmg_puncture = { base = pe_data.damagePerShot[2] },
 			dmg_slash = { base = pe_data.damagePerShot[3] },
@@ -326,9 +326,9 @@ export function parse_build(build)
 			crit_chance = { base = pe_data.criticalChance },
 		}
 	end
-	if build.melee?.name then
-		local pe_data = ExportWeapons[build.melee.name]
-		eval.melee = {
+	if inbuild.melee?.name then
+		local pe_data = ExportWeapons[inbuild.melee.name]
+		build.melee = {
 			dmg_impact = { base = pe_data.damagePerShot[1] },
 			dmg_puncture = { base = pe_data.damagePerShot[2] },
 			dmg_slash = { base = pe_data.damagePerShot[3] },
@@ -347,14 +347,14 @@ export function parse_build(build)
 		}
 	end
 	local sets = {}
-	if build.powersuit then
-		if build.powersuit.mods then
+	if inbuild.powersuit then
+		if inbuild.powersuit.mods then
 			local aura_mod
-			for pairs(build.powersuit.mods) as mod do
+			for pairs(inbuild.powersuit.mods) as mod do
 				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				local set_bonus = 1
 				if mod_data.ModSetValues then
-					local n = get_num_mods_from_set(build.powersuit.mods, mod_data.ModSet)
+					local n = get_num_mods_from_set(inbuild.powersuit.mods, mod_data.ModSet)
 					if n > 1 then
 						set_bonus += mod_data.ModSetValues[n - 1]
 					end
@@ -366,55 +366,55 @@ export function parse_build(build)
 					-- Save aura mod for later so aura strength can be applied
 					aura_mod = { data = mod_data, rank = mod.rank, mult = value_multiplier }
 				else
-					eval_applyMod(eval, "powersuit", mod_data, rank, value_multiplier)
+					build_applyMod(build, "powersuit", mod_data, rank, value_multiplier)
 				end
 			end
 			if aura_mod then
-				eval_applyMod(eval, "powersuit", aura_mod.data, aura_mod.rank, aura_mod.mult * stat_getValue(eval.powersuit.aura_strength) * stat_getValue(eval.powersuit.aura_effectiveness))
+				build_applyMod(build, "powersuit", aura_mod.data, aura_mod.rank, aura_mod.mult * stat_getValue(build.powersuit.aura_strength) * stat_getValue(build.powersuit.aura_effectiveness))
 			end
 		end
-		if eval.powersuit then
-			eval.powersuit.aura_strength = nil
-			eval.powersuit.aura_effectiveness = nil
+		if build.powersuit then
+			build.powersuit.aura_strength = nil
+			build.powersuit.aura_effectiveness = nil
 		end
 	end
-	if build.primary?.mods then
-		for pairs(build.primary.mods) as mod do
+	if inbuild.primary?.mods then
+		for pairs(inbuild.primary.mods) as mod do
 			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 			if mod_data.ModSet then
 				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 			end
-			eval_applyMod(eval, "primary", mod_data, mod.rank, (mod.rank or 0) + 1)
+			build_applyMod(build, "primary", mod_data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
-	if build.secondary?.mods then
-		for pairs(build.secondary.mods) as mod do
+	if inbuild.secondary?.mods then
+		for pairs(inbuild.secondary.mods) as mod do
 			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 			if mod_data.ModSet then
 				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 			end
-			eval_applyMod(eval, "secondary", mod_data, mod.rank, (mod.rank or 0) + 1)
+			build_applyMod(build, "secondary", mod_data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
-	if build.melee?.mods then
-		for pairs(build.melee.mods) as mod do
+	if inbuild.melee?.mods then
+		for pairs(inbuild.melee.mods) as mod do
 			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
 			local set_bonus = 1
 			if mod_data.ModSetValues then
-				local n = get_num_mods_from_set(build.melee.mods, mod_data.ModSet)
+				local n = get_num_mods_from_set(inbuild.melee.mods, mod_data.ModSet)
 				if n > 1 then
 					set_bonus += mod_data.ModSetValues[n - 1]
 				end
 			elseif mod_data.ModSet then
 				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 			end
-			eval_applyMod(eval, "melee", mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
+			build_applyMod(build, "melee", mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
 		end
 	end
 	for set, n in pairs(sets) do
-		eval_applyMod(eval, nil, overframe_modsets[set].data, n, n)
+		build_applyMod(build, nil, overframe_modsets[set].data, n, n)
 	end
-	return eval
+	return build
 end
 
 export function build_getConditionals(build)
@@ -437,20 +437,20 @@ export function build_getConditionals(build)
 end
 
 export function build_applyConditionals(build, to_apply)
-	local flat_build = {}
+	local outbuild = {}
 	for gear_name, gear in pairs(build) do
-		flat_build[gear_name] = {}
+		outbuild[gear_name] = {}
 		for stat_name, stat in pairs(gear) do
-			flat_build[gear_name][stat_name] = stat_applyConditionals(stat, to_apply)
+			outbuild[gear_name][stat_name] = stat_applyConditionals(stat, to_apply)
 		end
 	end
-	if flat_build.powersuit then
-		flat_build.powersuit.power_health = flat_build.powersuit.power * flat_build.powersuit.power_to_health_efficiency
-		flat_build.powersuit.armor_damage_reduction = flat_build.powersuit.armor / (flat_build.powersuit.armor + 300)
-		flat_build.powersuit.effective_health = flat_build.powersuit.health / (1 - flat_build.powersuit.armor_damage_reduction)
-		flat_build.powersuit.effective_health_incl_power = flat_build.powersuit.effective_health + flat_build.powersuit.power_health / (1 - flat_build.powersuit.armor_damage_reduction)
+	if outbuild.powersuit then
+		outbuild.powersuit.power_health = outbuild.powersuit.power * outbuild.powersuit.power_to_health_efficiency
+		outbuild.powersuit.armor_damage_reduction = outbuild.powersuit.armor / (outbuild.powersuit.armor + 300)
+		outbuild.powersuit.effective_health = outbuild.powersuit.health / (1 - outbuild.powersuit.armor_damage_reduction)
+		outbuild.powersuit.effective_health_incl_power = outbuild.powersuit.effective_health + outbuild.powersuit.power_health / (1 - outbuild.powersuit.armor_damage_reduction)
 	end
-	return flat_build
+	return outbuild
 end
 
 export function build_applyNoConditionals(build)
