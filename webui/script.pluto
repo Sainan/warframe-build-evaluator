@@ -57,6 +57,8 @@ local function share_mods(mods)
 end
 
 function evaluate_build(inbuild)
+	js_invoke("update_export", exportvar(inbuild))
+
 	document.querySelector("pre").textContent = dumpvar(evaluator.evaluate_build(inbuild))
 
 	local share = ""

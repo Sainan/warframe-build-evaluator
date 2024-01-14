@@ -215,6 +215,11 @@ function base64url_decode(str)
     return uintArray;
 }
 
+function update_export(str)
+{
+	console.log(str);
+}
+
 function update_share(share)
 {
 	location.hash = base64url_encode(new Uint8Array(Object.values(share)));
