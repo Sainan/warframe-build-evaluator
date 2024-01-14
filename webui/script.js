@@ -58,12 +58,63 @@ function get_key(input)
 	return document.getElementById(input.getAttribute("list")).querySelector("[value='"+input.value.split("'").join("\\'")+"']")?.getAttribute("data-key");
 }
 
-function ready_to_evaluate()
+function set_key(input, key)
+{
+	input.value = document.getElementById(input.getAttribute("list")).querySelector("[data-key='"+key+"']").value;
+}
+
+function initial_evaluation()
 {
 	evaluate_build();
 	document.querySelectorAll("input[list], input[type='number']").forEach(elm => {
 		elm.oninput = () => evaluate_build();
-	})
+	});
+}
+
+function unpack_mods(elm, mods)
+{
+	elm.forEach((input, i) => {
+		if (mods[i])
+		{
+			set_key(input, mods[i].name);
+			input.parentNode.querySelector("input[type='number']").valueAsNumber = mods[i].rank;
+		}
+	});
+}
+
+function ready_to_evaluate()
+{
+	let share = location.hash.substr(1);
+	if (share)
+	{
+		pluto_invoke("unpack_share", base64url_decode(share)).then(build => {
+			if (build.powersuit)
+			{
+				set_key(document.querySelector("input[list='datalist-powersuits']"), build.powersuit.name);
+				unpack_mods(document.querySelectorAll("input[list='datalist-powersuit-mods']"), build.powersuit.mods);
+			}
+			if (build.primary)
+			{
+				set_key(document.querySelector("input[list='datalist-primaries']"), build.primary.name);
+				unpack_mods(document.querySelectorAll("input[list='datalist-primary-mods']"), build.primary.mods);
+			}
+			if (build.secondary)
+			{
+				set_key(document.querySelector("input[list='datalist-secondaries']"), build.secondary.name);
+				unpack_mods(document.querySelectorAll("input[list='datalist-secondary-mods']"), build.secondary.mods);
+			}
+			if (build.melee)
+			{
+				set_key(document.querySelector("input[list='datalist-melees']"), build.melee.name);
+				unpack_mods(document.querySelectorAll("input[list='datalist-melee-mods']"), build.melee.mods);
+			}
+			initial_evaluation();
+		});
+	}
+	else
+	{
+		initial_evaluation();
+	}
 }
 
 function tally_mods(elm)
@@ -142,7 +193,29 @@ function evaluate_build()
 		};
 	}
 
-	pluto_invoke("evaluate_build", inbuild).then(data => pluto_invoke("dumpvar", data)).then(data => {
-		document.querySelector("pre").textContent = data;
-	});
+	pluto_invoke("evaluate_build", inbuild);
+}
+
+function base64url_encode(uintArray)
+{
+    let binaryString = Array.from(uintArray).map(byte => String.fromCharCode(byte)).join('');
+    let base64String = btoa(binaryString);
+    return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');}
+
+function base64url_decode(str)
+{
+    let paddedStr = str.padEnd(str.length + (4 - str.length % 4) % 4, '=');
+    let base64String = paddedStr.replace(/-/g, '+').replace(/_/g, '/');
+    let binaryString = atob(base64String);
+    let uintArray = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++)
+    {
+        uintArray[i] = binaryString.charCodeAt(i);
+    }
+    return uintArray;
+}
+
+function update_share(share)
+{
+	location.hash = base64url_encode(new Uint8Array(Object.values(share)));
 }
