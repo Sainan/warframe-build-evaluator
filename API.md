@@ -16,7 +16,7 @@ The mods table is an array of mods. Each mod must have a "name" property. The "r
 
 An example inbuild:
 
-```Lua
+```lua
 {
     powersuit = {
         name = "/Lotus/Powersuits/Sandman/InarosPrime",
@@ -71,7 +71,7 @@ The table of conditionals should contain conditional_name-stacks pairs.
 
 For example, to get an Outbuild based on 12x Combo:
 
-```Lua
+```lua
 build_applyConditionals(build, {
     ["/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition"] = 11
 })
