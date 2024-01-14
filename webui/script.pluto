@@ -40,10 +40,7 @@ end
 
 local evaluator = dofile("/evaluator.pluto")
 
-function get_max_rank(mod)
-	local qa = overframe_mods[mod].data.FusionLimit
-	return qa ? evaluator.fusion_level_to_rank(overframe_mods[mod].data.FusionLimit) : 5
-end
+get_max_rank = evaluator.get_fusion_limit
 
 local function share_mods(mods)
 	local share = ""

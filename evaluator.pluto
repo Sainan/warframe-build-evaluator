@@ -100,13 +100,18 @@ local function gear_getStats(gear, upgradeType): table
 	end
 end
 
-export function fusion_level_to_rank(qa): int
+local function fusion_level_to_rank(qa): int
 	return switch qa do
 		case "QA_VERY_HIGH" -> 10
 		case "QA_HIGH" -> 5
 		case "QA_MEDIUM" -> 3
 		default -> 0
 	end
+end
+
+export function get_fusion_limit(mod): int
+	local mod_data = (overframe_mods[mod] or error("Unknown mod: "..mod)).data
+	return mod_data.FusionLimit ? fusion_level_to_rank(mod_data.FusionLimit) : 5
 end
 
 local function eval_applyMod(eval, gear_name: ?string, mod, rank = 0, value_multiplier = 1)
