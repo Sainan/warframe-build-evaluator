@@ -448,7 +448,8 @@ export function build_applyConditionals(build, to_apply)
 		outbuild.powersuit.power_health = outbuild.powersuit.power * outbuild.powersuit.power_to_health_efficiency
 		outbuild.powersuit.armor_damage_reduction = outbuild.powersuit.armor / (outbuild.powersuit.armor + 300)
 		outbuild.powersuit.effective_health = outbuild.powersuit.health / (1 - outbuild.powersuit.armor_damage_reduction)
-		outbuild.powersuit.effective_health_incl_power = outbuild.powersuit.effective_health + outbuild.powersuit.power_health / (1 - outbuild.powersuit.armor_damage_reduction)
+		outbuild.powersuit.effective_power_health = outbuild.powersuit.power_health / (1 - outbuild.powersuit.armor_damage_reduction)
+		outbuild.powersuit.effective_health_incl_power = outbuild.powersuit.effective_health + outbuild.powersuit.effective_power_health
 	end
 	return outbuild
 end
