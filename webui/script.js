@@ -16,19 +16,19 @@ fetch("../data/ExportUpgrades_en.json")
 			let option = document.createElement("option");
 			option.setAttribute("data-key", item.uniqueName);
 			option.value = item.name;
-			if (item.compatName == "WARFRAME" || item.compatName == "AURA")
+			if (item.type == "WARFRAME" || item.type == "AURA")
 			{
 				document.getElementById("datalist-powersuit-mods").appendChild(option);
 			}
-			else if (item.compatName == "PRIMARY")
+			else if (item.type == "PRIMARY")
 			{
 				document.getElementById("datalist-primary-mods").appendChild(option);
 			}
-			else if (item.compatName == "Pistol")
+			else if (item.type == "SECONDARY")
 			{
 				document.getElementById("datalist-secondary-mods").appendChild(option);
 			}
-			else if (item.compatName == "Melee")
+			else if (item.type == "MELEE")
 			{
 				document.getElementById("datalist-melee-mods").appendChild(option);
 			}
