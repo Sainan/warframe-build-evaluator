@@ -165,52 +165,36 @@ function evaluate_build()
 {
 	let inbuild = {};
 
-	let powersuit = get_key(document.querySelector("input[list='datalist-powersuits']"));
-	if (powersuit)
-	{
-		inbuild.powersuit = {
-			name: powersuit,
-			mods: tally_mods(document.querySelectorAll("input[list='datalist-powersuit-mods']"))
-		};
-		document.querySelectorAll("input[list='datalist-crystals']").forEach(input => {
-			let key = get_key(input);
-			if (key)
-			{
-				inbuild.powersuit.mods.push({ name: key });
-			}
-			else if (input.value != "")
-			{
-				console.log("Ignoring unknown crystal:", input.value);
-			}
-		});
-	}
+	inbuild.powersuit = {
+		name: get_key(document.querySelector("input[list='datalist-powersuits']")),
+		mods: tally_mods(document.querySelectorAll("input[list='datalist-powersuit-mods']"))
+	};
+	document.querySelectorAll("input[list='datalist-crystals']").forEach(input => {
+		let key = get_key(input);
+		if (key)
+		{
+			inbuild.powersuit.mods.push({ name: key });
+		}
+		else if (input.value != "")
+		{
+			console.log("Ignoring unknown crystal:", input.value);
+		}
+	});
 
-	let primary = get_key(document.querySelector("input[list='datalist-primaries']"));
-	if (primary)
-	{
-		inbuild.primary = {
-			name: primary,
-			mods: tally_mods(document.querySelectorAll("input[list='datalist-primary-mods']"))
-		};
-	}
+	inbuild.primary = {
+		name: get_key(document.querySelector("input[list='datalist-primaries']")),
+		mods: tally_mods(document.querySelectorAll("input[list='datalist-primary-mods']"))
+	};
 
-	let secondary = get_key(document.querySelector("input[list='datalist-secondaries']"));
-	if (secondary)
-	{
-		inbuild.secondary = {
-			name: secondary,
-			mods: tally_mods(document.querySelectorAll("input[list='datalist-secondary-mods']"))
-		};
-	}
+	inbuild.secondary = {
+		name: get_key(document.querySelector("input[list='datalist-secondaries']")),
+		mods: tally_mods(document.querySelectorAll("input[list='datalist-secondary-mods']"))
+	};
 
-	let melee = get_key(document.querySelector("input[list='datalist-melees']"));
-	if (melee)
-	{
-		inbuild.melee = {
-			name: melee,
-			mods: tally_mods(document.querySelectorAll("input[list='datalist-melee-mods']"))
-		};
-	}
+	inbuild.melee = {
+		name: get_key(document.querySelector("input[list='datalist-melees']")),
+		mods: tally_mods(document.querySelectorAll("input[list='datalist-melee-mods']"))
+	};
 
 	let conditionals = {};
 	document.querySelectorAll("#conditionals input").forEach(input => {

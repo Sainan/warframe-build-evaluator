@@ -61,25 +61,25 @@ function evaluate_build(inbuild, conditionals)
 	document.querySelector("pre").textContent = dumpvar(evaluator.build_applyConditionals(build, conditionals))
 
 	local share = ""
-	if inbuild.powersuit then
+	if inbuild.powersuit?.name then
 		share ..= string.pack("B", ExportWarframes[inbuild.powersuit.name].id)
 		share ..= share_mods(inbuild.powersuit.mods)
 	else
 		share ..= string.pack("B", 0)
 	end
-	if inbuild.primary then
+	if inbuild.primary?.name then
 		share ..= string.pack("H", ExportWeapons[inbuild.primary.name].id)
 		share ..= share_mods(inbuild.primary.mods)
 	else
 		share ..= string.pack("H", 0)
 	end
-	if inbuild.secondary then
+	if inbuild.secondary?.name then
 		share ..= string.pack("H", ExportWeapons[inbuild.secondary.name].id)
 		share ..= share_mods(inbuild.secondary.mods)
 	else
 		share ..= string.pack("H", 0)
 	end
-	if inbuild.melee then
+	if inbuild.melee?.name then
 		share ..= string.pack("H", ExportWeapons[inbuild.melee.name].id)
 		share ..= share_mods(inbuild.melee.mods)
 	else
