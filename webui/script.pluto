@@ -46,8 +46,9 @@ local function share_mods(mods)
 	local share = ""
 	for mods as mod do
 		if id := overframe_mods[mod.name].id then -- Archon shards currently don't get assigned an id
-			assert(id <= 0xfff)
-			share ..= string.pack("H", id << 4 | mod.rank)
+			assert(id <= 0xffff)
+			share ..= string.pack("H", id)
+			share ..= string.pack("B", mod.rank)
 		end
 	end
 	return string.pack("s1", share)
@@ -103,11 +104,12 @@ local function unpack_mods(share, i)
 
 	i = 1
 	while i < #share do
-		local id
+		local id, rank
 		id, i = string.unpack("H", share, i)
+		rank, i = string.unpack("B", share, i)
 		local mod = {
-			name = id_to_name(overframe_mods, id >> 4),
-			rank = id & 0xf
+			name = id_to_name(overframe_mods, id),
+			rank = rank
 		}
 		assert(mod.name)
 		mods:insert(mod)
