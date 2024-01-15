@@ -228,7 +228,8 @@ function base64url_encode(uintArray)
 {
     let binaryString = Array.from(uintArray).map(byte => String.fromCharCode(byte)).join('');
     let base64String = btoa(binaryString);
-    return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');}
+    return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
 
 function base64url_decode(str)
 {
