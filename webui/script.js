@@ -146,7 +146,12 @@ function tally_mods(elm)
 					evaluate_build();
 				}
 			});
-			mods.push({ name: key, rank: input.parentNode.querySelector("input[type='number']").valueAsNumber });
+			let rank = input.parentNode.querySelector("input[type='number']").valueAsNumber;
+			if (isNaN(rank))
+			{
+				rank = 0;
+			}
+			mods.push({ name: key, rank: rank });
 		}
 		else if (input.value != "")
 		{
