@@ -39,7 +39,7 @@ fetch("../data/ExportUpgrades_en.json")
 	.then(response => response.json())
 	.then(data => {
 		data.ExportRelicArcane.forEach(item => {
-			if (item.levelStats)
+			if (item.levelStats && !item.excludeFromCodex)
 			{
 				let option = document.createElement("option");
 				option.setAttribute("data-key", item.uniqueName);
