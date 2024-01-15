@@ -301,3 +301,16 @@ do
 		}
 	}.powersuit.health, 5405))
 end
+
+-- Elementals
+do
+	assert(about_equal(evaluate_build{
+		secondary = {
+			name = "/Lotus/Weapons/Tenno/Shotgun/Shotgun",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Shotgun/WeaponElectricityDamageMod", rank = 5 },
+				{ name = "/Lotus/Upgrades/Mods/Shotgun/WeaponDamageAmountMod", rank = 5 },
+			}
+		}
+	}.secondary.dmg_electricity, 42.8))
+end
