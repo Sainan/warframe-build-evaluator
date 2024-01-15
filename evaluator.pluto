@@ -209,6 +209,25 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 	end
 end
 
+local function init_gear(pe_data)
+	return {
+		dmg_impact = { base = pe_data.damagePerShot[1] },
+		dmg_puncture = { base = pe_data.damagePerShot[2] },
+		dmg_slash = { base = pe_data.damagePerShot[3] },
+		dmg_heat = { base = pe_data.damagePerShot[4] },
+		dmg_cold = { base = pe_data.damagePerShot[5] },
+		dmg_electricity = { base = pe_data.damagePerShot[6] },
+		dmg_toxin = { base = pe_data.damagePerShot[7] },
+		dmg_blast = { base = pe_data.damagePerShot[8] },
+		dmg_radiation = { base = pe_data.damagePerShot[9] },
+		dmg_gas = { base = pe_data.damagePerShot[10] },
+		dmg_magnetic = { base = pe_data.damagePerShot[11] },
+		dmg_viral = { base = pe_data.damagePerShot[12] },
+		dmg_corrosive = { base = pe_data.damagePerShot[13] },
+		crit_chance = { base = pe_data.criticalChance },
+	}
+end
+
 export function parse_build(inbuild)
 	local build = {}
 	if inbuild.powersuit?.name then
@@ -289,62 +308,15 @@ export function parse_build(inbuild)
 		end
 	end
 	if inbuild.primary?.name then
-		local pe_data = ExportWeapons[inbuild.primary.name]
-		build.primary = {
-			dmg_impact = { base = pe_data.damagePerShot[1] },
-			dmg_puncture = { base = pe_data.damagePerShot[2] },
-			dmg_slash = { base = pe_data.damagePerShot[3] },
-			dmg_heat = { base = pe_data.damagePerShot[4] },
-			dmg_cold = { base = pe_data.damagePerShot[5] },
-			dmg_electricity = { base = pe_data.damagePerShot[6] },
-			dmg_toxin = { base = pe_data.damagePerShot[7] },
-			dmg_blast = { base = pe_data.damagePerShot[8] },
-			dmg_radiation = { base = pe_data.damagePerShot[9] },
-			dmg_gas = { base = pe_data.damagePerShot[10] },
-			dmg_magnetic = { base = pe_data.damagePerShot[11] },
-			dmg_viral = { base = pe_data.damagePerShot[12] },
-			dmg_corrosive = { base = pe_data.damagePerShot[13] },
-			crit_chance = { base = pe_data.criticalChance },
-		}
+		build.primary = init_gear(ExportWeapons[inbuild.primary.name])
 	end
 	if inbuild.secondary?.name then
-		local pe_data = ExportWeapons[inbuild.secondary.name]
-		build.secondary = {
-			dmg_impact = { base = pe_data.damagePerShot[1] },
-			dmg_puncture = { base = pe_data.damagePerShot[2] },
-			dmg_slash = { base = pe_data.damagePerShot[3] },
-			dmg_heat = { base = pe_data.damagePerShot[4] },
-			dmg_cold = { base = pe_data.damagePerShot[5] },
-			dmg_electricity = { base = pe_data.damagePerShot[6] },
-			dmg_toxin = { base = pe_data.damagePerShot[7] },
-			dmg_blast = { base = pe_data.damagePerShot[8] },
-			dmg_radiation = { base = pe_data.damagePerShot[9] },
-			dmg_gas = { base = pe_data.damagePerShot[10] },
-			dmg_magnetic = { base = pe_data.damagePerShot[11] },
-			dmg_viral = { base = pe_data.damagePerShot[12] },
-			dmg_corrosive = { base = pe_data.damagePerShot[13] },
-			crit_chance = { base = pe_data.criticalChance },
-		}
+		build.secondary = init_gear(ExportWeapons[inbuild.secondary.name])
 	end
 	if inbuild.melee?.name then
 		local pe_data = ExportWeapons[inbuild.melee.name]
-		build.melee = {
-			dmg_impact = { base = pe_data.damagePerShot[1] },
-			dmg_puncture = { base = pe_data.damagePerShot[2] },
-			dmg_slash = { base = pe_data.damagePerShot[3] },
-			dmg_heat = { base = pe_data.damagePerShot[4] },
-			dmg_cold = { base = pe_data.damagePerShot[5] },
-			dmg_electricity = { base = pe_data.damagePerShot[6] },
-			dmg_toxin = { base = pe_data.damagePerShot[7] },
-			dmg_blast = { base = pe_data.damagePerShot[8] },
-			dmg_radiation = { base = pe_data.damagePerShot[9] },
-			dmg_gas = { base = pe_data.damagePerShot[10] },
-			dmg_magnetic = { base = pe_data.damagePerShot[11] },
-			dmg_viral = { base = pe_data.damagePerShot[12] },
-			dmg_corrosive = { base = pe_data.damagePerShot[13] },
-			crit_chance = { base = pe_data.criticalChance },
-			combo_duration = { base = pe_data.comboDuration },
-		}
+		build.melee = init_gear(pe_data)
+		build.melee.combo_duration = { base = pe_data.comboDuration }
 	end
 	local sets = {}
 	if inbuild.powersuit then
