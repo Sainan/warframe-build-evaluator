@@ -142,8 +142,8 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 						applied = true
 						stat_addConditional(stat, {
 							type = mod.ConditionalUpgrades[1],
-							proc_chance = mod.UpgradeChance or 1,
-							max_stacks = mod.MaxConditionalStacks or 1,
+							proc_chance = mod.UpgradeChance,
+							max_stacks = mod.MaxConditionalStacks,
 							operation = upgrade.OperationType,
 							value = upgrade.Value * value_multiplier,
 						})
@@ -156,8 +156,8 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 							if stat := build[upgrade_gear_name]?[upgrade_stat_name] then
 								stat_addConditional(stat, {
 									type = mod.ConditionalUpgrades[1],
-									proc_chance = mod.UpgradeChance or 1,
-									max_stacks = mod.MaxConditionalStacks or 1,
+									proc_chance = mod.UpgradeChance,
+									max_stacks = mod.MaxConditionalStacks,
 									operation = upgrade.OperationType,
 									value = upgrade.Value * value_multiplier,
 								})
@@ -426,8 +426,8 @@ export function build_getConditionals(build)
 				for pairs(stat.conditionals) as conditional do
 					if not conditionals[conditional.type] then
 						conditionals[conditional.type] = {
-							proc_chance = conditional.proc_chance,
-							max_stacks = conditional.max_stacks
+							proc_chance = conditional.proc_chance or 1,
+							max_stacks = conditional.max_stacks or 1
 						}
 					end
 				end
