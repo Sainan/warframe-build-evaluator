@@ -469,3 +469,81 @@ end
 export function evaluate_build(build)
 	return build_applyNoConditionals(parse_build(build))
 end
+
+-- Evaluation for damage against enemies (Experimental)
+
+if not enemies then
+	local cloned_flesh = {
+		impact = -0.25,
+		slash = 0.25,
+		gas = -0.50,
+		heat = 0.25,
+		cloned_flesh = 0.75,
+	}
+
+	local ferrite_armor = {
+		puncture = 0.50,
+		slash = -0.15,
+		blast = -0.25,
+		viral = 0.75,
+	}
+
+	enemies = {
+		["Lancer"] = {
+			base_level = 1,
+			health = cloned_flesh,
+			armor = ferrite_armor,
+			armor_points = 100,
+		},
+		["Heavy Gunner"] = {
+			base_level = 8,
+			health = cloned_flesh,
+			armor = ferrite_armor,
+			armor_points = 500,
+		}
+	}
+end
+
+local function level_scaling_trans(base_level, start, _end, level)
+	if level - base_level < start then
+		return 0
+	end
+	if level - base_level > _end then
+		return 1
+	end
+	local T = (level - base_level - start) / (_end - start)
+	return 3 * T ^ 2 - 2 * T ^ 3
+end
+
+local function enemy_getArmor(enemy, level)
+	if level < enemy.base_level then
+		level = enemy.base_level
+	end
+	local old_armor = 1 + 0.005 * (level - enemy.base_level) ^ 1.75
+	local new_armor = 1 + 0.40 * (level - enemy.base_level) ^ 0.75
+	local armor_mult = old_armor * (1 - level_scaling_trans(enemy.base_level, 70, 80, level)) + new_armor * level_scaling_trans(enemy.base_level, 70, 80, level)
+	return enemy.armor_points * armor_mult
+end
+
+local function enemy_getEffectiveDamageOfType(enemy, level, damage_type, amount)
+	local health_offset = enemy.health[damage_type] or 0
+	local armor_offset = enemy.armor[damage_type] or 0
+	local armor = enemy_getArmor(enemy, level)
+	return amount * (1 + health_offset) * (1 + armor_offset) * 300 / (300 + armor * (1 - armor_offset))
+end
+
+export function enemy_getEffectiveDamage(enemy, level, gear)
+	return enemy_getEffectiveDamageOfType(enemy, level, "impact", gear.dmg_impact)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "puncture", gear.dmg_puncture)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "slash", gear.dmg_slash)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "heat", gear.dmg_heat)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "cold", gear.dmg_cold)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "electricity", gear.dmg_electricity)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "toxin", gear.dmg_toxin)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "blast", gear.dmg_blast)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "radiation", gear.dmg_radiation)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "gas", gear.dmg_gas)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "magnetic", gear.dmg_magnetic)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "viral", gear.dmg_viral)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "corrosive", gear.dmg_corrosive)
+end
