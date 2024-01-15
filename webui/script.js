@@ -247,7 +247,6 @@ const friendly_conditional_names = {
 	"/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition": "Combo",
 	"PM_HEAVY_MELEE": "Heavy Attack",
 	"CC_SLIDING": "Slide Attack",
-	"/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnCritCondition": "On Critical Hit",
 };
 
 function update_conditionals(conditionals)
@@ -259,9 +258,7 @@ function update_conditionals(conditionals)
 
 			let label = document.createElement("label");
 			label.setAttribute("for", conditional_name);
-			label.textContent = (friendly_conditional_names[conditional_name] ?? conditional_name)
-				+ (conditional.proc_chance != 1 ? " (" + (conditional.proc_chance * 100).toFixed(0) + "% Chance)" : "")
-				+ ": ";
+			label.textContent = (document.querySelector("[data-key='"+conditional_name+"']")?.value ?? friendly_conditional_names[conditional_name] ?? conditional_name) + ": ";
 
 			let input = document.createElement("input");
 			input.id = conditional_name;

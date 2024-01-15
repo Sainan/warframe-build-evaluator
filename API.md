@@ -63,7 +63,7 @@ Does the same as `build_applyNoConditionals(parse_build(Inbuild))`.
 
 Returns a table of conditional_name-conditional pairs.
 
-A conditional has the "max_stacks" and "proc_chance" properties.
+A conditional contains "type", "source", "max_stacks" and "proc_chance".
 
 ### `build_applyConditionals(Build, table): Outbuild`
 

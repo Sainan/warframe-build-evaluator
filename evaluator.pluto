@@ -46,6 +46,12 @@ local function stat_addConditional(stat, conditional)
 	if not stat.conditionals then
 		stat.conditionals = {}
 	end
+	if conditional.proc_chance and conditional.proc_chance ~= 1 then
+		conditional.name = conditional.source
+	else
+		conditional.name = conditional.type
+	end
+
 	stat.conditionals[#stat.conditionals + 1] = conditional
 end
 
@@ -61,8 +67,8 @@ local function stat_applyConditionals(stat, to_apply)
 	}
 	if stat.conditionals then
 		for pairs(stat.conditionals) as conditional do
-			if to_apply[conditional.type] ~= nil then
-				stat_addOperation(tmp, conditional.operation, conditional.value * to_apply[conditional.type])
+			if to_apply[conditional.name] ~= nil then
+				stat_addOperation(tmp, conditional.operation, conditional.value * to_apply[conditional.name])
 			end
 		end
 	end
@@ -130,7 +136,7 @@ export function get_fusion_limit(mod): int
 	return mod_data.FusionLimit ? fusion_level_to_rank(mod_data.FusionLimit) : 5
 end
 
-local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_multiplier = 1)
+local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0, value_multiplier = 1)
 	if mod.Upgrades then
 		if mod.ConditionalUpgrades then
 			for pairs(mod.Upgrades) as upgrade do
@@ -142,6 +148,7 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 						applied = true
 						stat_addConditional(stat, {
 							type = mod.ConditionalUpgrades[1],
+							source = mod_name,
 							proc_chance = mod.UpgradeChance,
 							max_stacks = mod.MaxConditionalStacks,
 							operation = upgrade.OperationType,
@@ -156,6 +163,7 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 							if stat := build[upgrade_gear_name]?[upgrade_stat_name] then
 								stat_addConditional(stat, {
 									type = mod.ConditionalUpgrades[1],
+									source = mod_name,
 									proc_chance = mod.UpgradeChance,
 									max_stacks = mod.MaxConditionalStacks,
 									operation = upgrade.OperationType,
@@ -175,6 +183,7 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 						if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 							stat_addConditional(stat, {
 								type = upgrade.ValidModifiers[1],
+								source = mod_name,
 								max_stacks = 1,
 								operation = upgrade.OperationType,
 								value = upgrade.Value * value_multiplier
@@ -183,6 +192,7 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 							if upgrade.SymbolFilter ~= "CC_SLIDING_PVP" then
 								stat_addConditional(stat, {
 									type = upgrade.SymbolFilter,
+									source = mod_name,
 									max_stacks = 1,
 									operation = upgrade.OperationType,
 									value = upgrade.Value * value_multiplier
@@ -219,7 +229,7 @@ local function build_applyMod(build, gear_name: ?string, mod, rank = 0, value_mu
 	if mod.SubUpgrades then
 		for pairs(mod.SubUpgrades) as sub_upgrade do
 			if type(sub_upgrade) == "table" then
-				build_applyMod(build, gear_name, sub_upgrade, rank, value_multiplier)
+				build_applyMod(build, gear_name, mod_name, sub_upgrade, rank, value_multiplier)
 			end
 		end
 	end
@@ -365,13 +375,13 @@ export function parse_build(inbuild)
 				local value_multiplier = ((mod.rank or 0) + 1) * set_bonus
 				if mod_data.ItemCompatibilityLocTag == "/Lotus/Language/Menu/CategoryAura" then
 					-- Save aura mod for later so aura strength can be applied
-					aura_mod = { data = mod_data, rank = mod.rank, mult = value_multiplier }
+					aura_mod = { name = mod.name, data = mod_data, rank = mod.rank, mult = value_multiplier }
 				else
-					build_applyMod(build, "powersuit", mod_data, rank, value_multiplier)
+					build_applyMod(build, "powersuit", mod.name, mod_data, rank, value_multiplier)
 				end
 			end
 			if aura_mod then
-				build_applyMod(build, "powersuit", aura_mod.data, aura_mod.rank, aura_mod.mult * stat_getValue(build.powersuit.aura_strength) * stat_getValue(build.powersuit.aura_effectiveness))
+				build_applyMod(build, "powersuit", aura_mod.name, aura_mod.data, aura_mod.rank, aura_mod.mult * stat_getValue(build.powersuit.aura_strength) * stat_getValue(build.powersuit.aura_effectiveness))
 			end
 		end
 		if build.powersuit then
@@ -385,7 +395,7 @@ export function parse_build(inbuild)
 			if mod_data.ModSet then
 				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 			end
-			build_applyMod(build, "primary", mod_data, mod.rank, (mod.rank or 0) + 1)
+			build_applyMod(build, "primary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if inbuild.secondary?.mods then
@@ -394,7 +404,7 @@ export function parse_build(inbuild)
 			if mod_data.ModSet then
 				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 			end
-			build_applyMod(build, "secondary", mod_data, mod.rank, (mod.rank or 0) + 1)
+			build_applyMod(build, "secondary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
 		end
 	end
 	if inbuild.melee?.mods then
@@ -409,11 +419,11 @@ export function parse_build(inbuild)
 			elseif mod_data.ModSet then
 				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 			end
-			build_applyMod(build, "melee", mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
+			build_applyMod(build, "melee", mod.name, mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
 		end
 	end
 	for set, n in pairs(sets) do
-		build_applyMod(build, nil, overframe_modsets[set].data, n, n)
+		build_applyMod(build, nil, set, overframe_modsets[set].data, n, n)
 	end
 	return build
 end
@@ -424,8 +434,10 @@ export function build_getConditionals(build)
 		for pairs(gear) as stat do
 			if stat.conditionals then
 				for pairs(stat.conditionals) as conditional do
-					if not conditionals[conditional.type] then
-						conditionals[conditional.type] = {
+					if not conditionals[conditional.name] then
+						conditionals[conditional.name] = {
+							type = conditional.type,
+							source = conditional.source,
 							proc_chance = conditional.proc_chance or 1,
 							max_stacks = conditional.max_stacks or 1
 						}
