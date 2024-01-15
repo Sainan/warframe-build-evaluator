@@ -34,6 +34,20 @@ fetch("../data/ExportUpgrades_en.json")
 			}
 		}
 	});
+
+	fetch("../data/ExportRelicArcane_en.json")
+	.then(response => response.json())
+	.then(data => {
+		data.ExportRelicArcane.forEach(item => {
+			if (item.levelStats)
+			{
+				let option = document.createElement("option");
+				option.setAttribute("data-key", item.uniqueName);
+				option.value = item.name;
+				document.getElementById("datalist-powersuit-mods").appendChild(option);
+			}
+		});
+	});
 });
 
 function fetch_data_json(name)
