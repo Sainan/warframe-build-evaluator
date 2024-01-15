@@ -11,6 +11,7 @@ fetch("../data/ExportUpgrades_en.json")
 	data.ExportUpgrades.forEach(item => {
 		if (!item.uniqueName.includes("/Beginner/") && !item.uniqueName.includes("/Intermediate/")
 			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/WeaponMeleeDamageOnHeavyKillMod"
+			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/Expert/WeaponCritFireRateBonusModExpert"
 			)
 		{
 			let option = document.createElement("option");
