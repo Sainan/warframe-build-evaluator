@@ -93,8 +93,8 @@ local function gear_getStats(gear, upgradeType): table
 		case "AVATAR_AURA_STRENGTH" -> { "aura_strength" }
 		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> { "aura_effectiveness" }
 		case "GAMEPLAY_POWER_TO_HEALTH_ON_DEATH" -> { "power_to_health_efficiency" }
+		case "WEAPON_DAMAGE_AMOUNT", "WEAPON_MELEE_DAMAGE" -> { "dmg_impact", "dmg_puncture", "dmg_slash", "dmg_heat", "dmg_cold", "dmg_electricity", "dmg_toxin", "dmg_blast", "dmg_radiation", "dmg_gas", "dmg_magnetic", "dmg_viral", "dmg_corrosive" }
 		case "WEAPON_CRIT_CHANCE" -> { "crit_chance" }
-		case "WEAPON_MELEE_DAMAGE" -> { "dmg_impact", "dmg_puncture", "dmg_slash", "dmg_heat", "dmg_cold", "dmg_electricity", "dmg_toxin", "dmg_blast", "dmg_radiation", "dmg_gas", "dmg_magnetic", "dmg_viral", "dmg_corrosive" }
 		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> { "combo_duration" }
 		default -> --[[print("Silently ignoring "..upgradeType) or]] {}
 	end
