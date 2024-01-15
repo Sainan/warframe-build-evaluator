@@ -24,3 +24,8 @@ body
 		overflow: auto;
 	}
 }
+
+#conditionals:not(:has(li))
+{
+	display: none;
+}

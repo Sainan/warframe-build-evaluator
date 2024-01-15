@@ -207,7 +207,16 @@ function evaluate_build()
 		};
 	}
 
-	pluto_invoke("evaluate_build", inbuild);
+	let conditionals = {};
+	document.querySelectorAll("#conditionals input").forEach(input => {
+		conditionals[input.id] = input.type == "checkbox" ? (input.checked ? 1 : 0) : input.value;
+		if (input.id == "/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition")
+		{
+			--conditionals[input.id];
+		}
+	});
+
+	pluto_invoke("evaluate_build", inbuild, conditionals);
 }
 
 function base64url_encode(uintArray)
@@ -232,6 +241,60 @@ function base64url_decode(str)
 function update_export(str)
 {
 	console.log(str);
+}
+
+const friendly_conditional_names = {
+	"/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition": "Combo",
+	"PM_HEAVY_MELEE": "Heavy Attack",
+	"CC_SLIDING": "Slide Attack",
+	"/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnCritCondition": "On Critical Hit",
+};
+
+function update_conditionals(conditionals)
+{
+	Object.keys(conditionals).sort().forEach(conditional_name => {
+		if (!document.getElementById(conditional_name))
+		{
+			let conditional = conditionals[conditional_name];
+
+			let label = document.createElement("label");
+			label.setAttribute("for", conditional_name);
+			label.textContent = (friendly_conditional_names[conditional_name] ?? conditional_name)
+				+ (conditional.proc_chance != 1 ? " (" + (conditional.proc_chance * 100).toFixed(0) + "% Chance)" : "")
+				+ ": ";
+
+			let input = document.createElement("input");
+			input.id = conditional_name;
+			if (conditional.max_stacks == 1)
+			{
+				input.type = "checkbox";
+			}
+			else
+			{
+				input.type = "number";
+				input.min = 0;
+				input.max = conditional.max_stacks;
+				if (conditional_name == "/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition")
+				{
+					++input.min;
+					++input.max;
+				}
+				input.value = input.min;
+			}
+			input.oninput = () => evaluate_build();
+
+			let li = document.createElement("li");
+			li.appendChild(label);
+			li.appendChild(input);
+			document.querySelector("#conditionals ul").appendChild(li);
+		}
+	});
+	document.querySelectorAll("#conditionals li").forEach(li => {
+		if (!conditionals[li.querySelector("input").id])
+		{
+			li.parentNode.removeChild(li);
+		}
+	});
 }
 
 function update_share(share)

@@ -53,10 +53,12 @@ local function share_mods(mods)
 	return string.pack("s1", share)
 end
 
-function evaluate_build(inbuild)
+function evaluate_build(inbuild, conditionals)
 	js_invoke("update_export", exportvar(inbuild))
 
-	document.querySelector("pre").textContent = dumpvar(evaluator.evaluate_build(inbuild))
+	local build = evaluator.parse_build(inbuild)
+	js_invoke("update_conditionals", evaluator.build_getConditionals(build))
+	document.querySelector("pre").textContent = dumpvar(evaluator.build_applyConditionals(build, conditionals))
 
 	local share = ""
 	if inbuild.powersuit then
