@@ -5,6 +5,14 @@ document.querySelectorAll("[data-repeat-count]").forEach(elm => {
 	}
 });
 
+function create_item_option(item)
+{
+	let option = document.createElement("option");
+	option.setAttribute("data-key", item.uniqueName);
+	option.value = item.name;
+	return option;
+}
+
 fetch("../data/ExportUpgrades_en.json")
 .then(response => response.json())
 .then(data => {
@@ -14,24 +22,21 @@ fetch("../data/ExportUpgrades_en.json")
 			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/Expert/WeaponCritFireRateBonusModExpert"
 			)
 		{
-			let option = document.createElement("option");
-			option.setAttribute("data-key", item.uniqueName);
-			option.value = item.name;
 			if (item.type == "WARFRAME" || item.type == "AURA")
 			{
-				document.getElementById("datalist-powersuit-mods").appendChild(option);
+				document.getElementById("datalist-powersuit-mods").appendChild(create_item_option(item));
 			}
 			else if (item.type == "PRIMARY")
 			{
-				document.getElementById("datalist-primary-mods").appendChild(option);
+				document.getElementById("datalist-primary-mods").appendChild(create_item_option(item));
 			}
 			else if (item.type == "SECONDARY")
 			{
-				document.getElementById("datalist-secondary-mods").appendChild(option);
+				document.getElementById("datalist-secondary-mods").appendChild(create_item_option(item));
 			}
 			else if (item.type == "MELEE")
 			{
-				document.getElementById("datalist-melee-mods").appendChild(option);
+				document.getElementById("datalist-melee-mods").appendChild(create_item_option(item));
 			}
 		}
 	});
@@ -42,10 +47,10 @@ fetch("../data/ExportUpgrades_en.json")
 		data.ExportRelicArcane.forEach(item => {
 			if (item.levelStats && !item.excludeFromCodex)
 			{
-				let option = document.createElement("option");
-				option.setAttribute("data-key", item.uniqueName);
-				option.value = item.name;
-				document.getElementById("datalist-powersuit-mods").appendChild(option);
+				document.getElementById("datalist-powersuit-mods").appendChild(create_item_option(item));
+				document.getElementById("datalist-primary-mods").appendChild(create_item_option(item));
+				document.getElementById("datalist-secondary-mods").appendChild(create_item_option(item));
+				document.getElementById("datalist-melee-mods").appendChild(create_item_option(item));
 			}
 		});
 	});
