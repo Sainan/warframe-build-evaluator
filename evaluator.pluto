@@ -94,6 +94,10 @@ local function gear_getStats(gear, upgrade): table
 	return switch upgrade.UpgradeType do
 		case "AVATAR_HEALTH_MAX" -> { "health" }
 		case "AVATAR_ARMOUR" -> { "armor" }
+		case "AVATAR_POWER_MAX" -> { "power" }
+		case "AVATAR_ABILITY_DURATION" -> { "ability_duration" }
+		case "AVATAR_ABILITY_EFFICIENCY" -> { "ability_efficiency" }
+		case "AVATAR_ABILITY_RANGE" -> { "ability_range" }
 		case "AVATAR_ABILITY_STRENGTH" -> { "ability_strength" }
 		case "AVATAR_HEAL_RATE" -> { "heal_rate" }
 		case "AVATAR_AURA_STRENGTH" -> { "aura_strength" }
@@ -117,6 +121,7 @@ local function gear_getStats(gear, upgrade): table
 			default -> --[[print("Silently ignoring WEAPON_PERCENT_BASE_DAMAGE_ADDED with "..upgrade.DamageType) or]] {}
 		end
 		case "WEAPON_CRIT_CHANCE" -> { "crit_chance" }
+		case "WEAPON_FIRE_RATE" -> { "fire_rate" }
 		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> { "combo_duration" }
 		default -> --[[print("Silently ignoring "..upgradeType) or]] {}
 	end
@@ -264,6 +269,7 @@ local function init_gear(pe_data)
 		dmgadd_viral = { base = 0 },
 		dmgadd_corrosive = { base = 0 },
 		crit_chance = { base = pe_data.criticalChance },
+		fire_rate = { base = pe_data.fireRate },
 	}
 end
 
@@ -276,6 +282,9 @@ export function parse_build(inbuild)
 			shield = { base = pe_data.shield },
 			armor = { base = pe_data.armor },
 			power = { base = pe_data.power },
+			ability_duration = { base = 1 },
+			ability_efficiency = { base = 1 },
+			ability_range = { base = 1 },
 			ability_strength = { base = 1, stacking_multiply_base = 1 },
 			heal_rate = { base = 0 },
 			aura_strength = { base = 1 },
