@@ -110,22 +110,34 @@ function ready_to_evaluate()
 		pluto_invoke("unpack_share", base64url_decode(share)).then(build => {
 			if (build.powersuit)
 			{
-				set_key(document.querySelector("input[list='datalist-powersuits']"), build.powersuit.name);
+				if (build.powersuit.name)
+				{
+					set_key(document.querySelector("input[list='datalist-powersuits']"), build.powersuit.name);
+				}
 				unpack_mods(document.querySelectorAll("input[list='datalist-powersuit-mods']"), build.powersuit.mods);
 			}
 			if (build.primary)
 			{
-				set_key(document.querySelector("input[list='datalist-primaries']"), build.primary.name);
+				if (build.primary.name)
+				{
+					set_key(document.querySelector("input[list='datalist-primaries']"), build.primary.name);
+				}
 				unpack_mods(document.querySelectorAll("input[list='datalist-primary-mods']"), build.primary.mods);
 			}
 			if (build.secondary)
 			{
-				set_key(document.querySelector("input[list='datalist-secondaries']"), build.secondary.name);
+				if (build.secondary.name)
+				{
+					set_key(document.querySelector("input[list='datalist-secondaries']"), build.secondary.name);
+				}
 				unpack_mods(document.querySelectorAll("input[list='datalist-secondary-mods']"), build.secondary.mods);
 			}
 			if (build.melee)
 			{
-				set_key(document.querySelector("input[list='datalist-melees']"), build.melee.name);
+				if (build.melee.name)
+				{
+					set_key(document.querySelector("input[list='datalist-melees']"), build.melee.name);
+				}
 				unpack_mods(document.querySelectorAll("input[list='datalist-melee-mods']"), build.melee.mods);
 			}
 			initial_evaluation();

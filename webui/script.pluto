@@ -16,7 +16,7 @@ do
 		end
 		item.id = ++i
 	end
-	assert(i <= 0xff)
+	assert(i < 0xff)
 	ExportWarframes = optimise_public_export(ExportWarframes)
 
 	ExportWeapons = js_invoke("fetch_data_json", "ExportWeapons_en").ExportWeapons
@@ -31,7 +31,7 @@ do
 		end
 		item.id = ++i
 	end
-	assert(i <= 0xffff)
+	assert(i < 0xffff)
 	ExportWeapons = optimise_public_export(ExportWeapons)
 
 	overframe_mods = js_invoke("fetch_data_json", "overframe_mods")
@@ -65,11 +65,17 @@ function evaluate_build(inbuild, conditionals)
 	if inbuild.powersuit?.name then
 		share ..= string.pack("B", ExportWarframes[inbuild.powersuit.name].id)
 		share ..= share_mods(inbuild.powersuit.mods)
+	elseif inbuild.powersuit?.mods and #inbuild.powersuit.mods ~= 0 then
+		share ..= string.pack("B", 0xff)
+		share ..= share_mods(inbuild.powersuit.mods)
 	else
 		share ..= string.pack("B", 0)
 	end
 	if inbuild.primary?.name then
 		share ..= string.pack("H", ExportWeapons[inbuild.primary.name].id)
+		share ..= share_mods(inbuild.primary.mods)
+	elseif inbuild.primary?.mods and #inbuild.primary.mods ~= 0 then
+		share ..= string.pack("H", 0xffff)
 		share ..= share_mods(inbuild.primary.mods)
 	else
 		share ..= string.pack("H", 0)
@@ -77,11 +83,17 @@ function evaluate_build(inbuild, conditionals)
 	if inbuild.secondary?.name then
 		share ..= string.pack("H", ExportWeapons[inbuild.secondary.name].id)
 		share ..= share_mods(inbuild.secondary.mods)
+	elseif inbuild.secondary?.mods and #inbuild.secondary.mods ~= 0 then
+		share ..= string.pack("H", 0xffff)
+		share ..= share_mods(inbuild.secondary.mods)
 	else
 		share ..= string.pack("H", 0)
 	end
 	if inbuild.melee?.name then
 		share ..= string.pack("H", ExportWeapons[inbuild.melee.name].id)
+		share ..= share_mods(inbuild.melee.mods)
+	elseif inbuild.melee?.mods and #inbuild.melee.mods ~= 0 then
+		share ..= string.pack("H", 0xffff)
 		share ..= share_mods(inbuild.melee.mods)
 	else
 		share ..= string.pack("H", 0)
@@ -125,34 +137,38 @@ function unpack_share(share)
 
 	id, i = string.unpack("B", share, i)
 	if id ~= 0 then
-		build.powersuit = {
-			name = id_to_name(ExportWarframes, id)
-		}
-		assert(build.powersuit.name)
+		build.powersuit = {}
+		if id ~= 0xff then
+			build.powersuit.name = id_to_name(ExportWarframes, id)
+			assert(build.powersuit.name)
+		end
 		build.powersuit.mods, i = unpack_mods(share, i)
 	end
 	id, i = string.unpack("H", share, i)
 	if id ~= 0 then
-		build.primary = {
-			name = id_to_name(ExportWeapons, id)
-		}
-		assert(build.primary.name)
+		build.primary = {}
+		if id ~= 0xffff then
+			build.primary.name = id_to_name(ExportWeapons, id)
+			assert(build.primary.name)
+		end
 		build.primary.mods, i = unpack_mods(share, i)
 	end
 	id, i = string.unpack("H", share, i)
 	if id ~= 0 then
-		build.secondary = {
-			name = id_to_name(ExportWeapons, id)
-		}
-		assert(build.secondary.name)
+		build.secondary = {}
+		if id ~= 0xffff then
+			build.secondary.name = id_to_name(ExportWeapons, id)
+			assert(build.secondary.name)
+		end
 		build.secondary.mods, i = unpack_mods(share, i)
 	end
 	id, i = string.unpack("H", share, i)
 	if id ~= 0 then
-		build.melee = {
-			name = id_to_name(ExportWeapons, id)
-		}
-		assert(build.melee.name)
+		build.melee = {}
+		if id ~= 0xffff then
+			build.melee.name = id_to_name(ExportWeapons, id)
+			assert(build.melee.name)
+		end
 		build.melee.mods, i = unpack_mods(share, i)
 	end
 
