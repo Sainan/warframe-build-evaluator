@@ -217,7 +217,7 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 				assert(upgrade.ValidType == "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon")
 				local stats = gear_getStats(build.melee, upgrade)
 				for pairs(stats) as stat_name do
-					if stat := build.melee[stat_name] then
+					if stat := build.melee?[stat_name] then
 						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
 					end
 				end
