@@ -290,6 +290,134 @@ function update_conditionals(conditionals)
 	});
 }
 
+function add_stat(ul, stat, fmt)
+{
+	let li = document.createElement("li");
+	li.textContent = fmt.split("{}").join(stat.toFixed(0));
+	ul.appendChild(li);
+}
+
+function add_opt_stat(ul, stat, fmt)
+{
+	if (stat != 0)
+	{
+		add_stat(ul, stat, fmt);
+	}
+}
+
+function add_gear_evaluation(ul, gear)
+{
+	add_opt_stat(ul, gear.dmg_impact, "{} Impact");
+	add_opt_stat(ul, gear.dmg_puncture, "{} Puncture");
+	add_opt_stat(ul, gear.dmg_slash, "{} Slash");
+	add_opt_stat(ul, gear.dmg_heat, "{} Heat");
+	add_opt_stat(ul, gear.dmg_cold, "{} Cold");
+	add_opt_stat(ul, gear.dmg_electricity, "{} Electricity");
+	add_opt_stat(ul, gear.dmg_toxin, "{} Toxin");
+	add_opt_stat(ul, gear.dmg_blast, "{} Blast");
+	add_opt_stat(ul, gear.dmg_radiation, "{} Radiation");
+	add_opt_stat(ul, gear.dmg_gas, "{} Gas");
+	add_opt_stat(ul, gear.dmg_magnetic, "{} Magnetic");
+	add_opt_stat(ul, gear.dmg_viral, "{} Viral");
+	add_opt_stat(ul, gear.dmg_corrosive, "{} Corrosive");
+	{
+		let li = document.createElement("li");
+		li.textContent = gear.fire_rate.toFixed(2) + (gear.combo_duration ? " Attack Speed" : " Fire Rate");
+		ul.appendChild(li);
+	}
+	add_stat(ul, gear.crit_chance * 100, "{}% Critical Chance");
+}
+
+function update_evaluation(outbuild)
+{
+	let evalbody = document.getElementById("evaluation-body");
+	evalbody.textContent = "";
+
+	if (outbuild.powersuit)
+	{
+		let p = document.createElement("p");
+		p.innerHTML = "<b>Warframe:</b>";
+		evalbody.appendChild(p);
+
+		let ul = document.createElement("ul");
+		{
+			let li = document.createElement("li");
+			li.textContent = outbuild.powersuit.effective_health_incl_power.toFixed(0) + " Effective Health";
+			{
+				let nested_ul = document.createElement("ul");
+				{
+					let nested_li = document.createElement("li");
+					nested_li.textContent = outbuild.powersuit.health.toFixed(0) + " Health";
+					nested_ul.appendChild(nested_li);
+				}
+				{
+					let nested_li = document.createElement("li");
+					nested_li.textContent = outbuild.powersuit.armor.toFixed(0) + " Armor reduces " + (outbuild.powersuit.armor_damage_reduction * 100).toFixed(0) + "% of incoming damage";
+					nested_ul.appendChild(nested_li);
+				}
+				{
+					let nested_li = document.createElement("li");
+					nested_li.textContent = outbuild.powersuit.power.toFixed(0) + " Energy can be converted to health with " + (outbuild.powersuit.power_to_health_efficiency * 100).toFixed(0) + "% efficiency";
+					nested_ul.appendChild(nested_li);
+				}
+				if (outbuild.powersuit.heal_rate != 0)
+				{
+					let nested_li = document.createElement("li");
+					nested_li.textContent = "+ " + outbuild.powersuit.heal_rate.toFixed(0) + " Health regenerated per second";
+					nested_ul.appendChild(nested_li);
+				}
+				li.appendChild(nested_ul);
+			}
+			ul.appendChild(li);
+		}
+		add_stat(ul, outbuild.powersuit.shield, "{} Shield");
+		add_stat(ul, outbuild.powersuit.ability_duration * 100, "{}% Ability Duration");
+		add_stat(ul, outbuild.powersuit.ability_efficiency * 100, "{}% Ability Efficiency");
+		add_stat(ul, outbuild.powersuit.ability_range * 100, "{}% Ability Range");
+		add_stat(ul, outbuild.powersuit.ability_strength * 100, "{}% Ability Strength");
+		evalbody.appendChild(ul);
+	}
+
+	if (outbuild.primary)
+	{
+		let p = document.createElement("p");
+		p.innerHTML = "<b>Primary:</b>";
+		evalbody.appendChild(p);
+
+		let ul = document.createElement("ul");
+		add_gear_evaluation(ul, outbuild.primary);
+		evalbody.appendChild(ul);
+	}
+
+	if (outbuild.secondary)
+	{
+		let p = document.createElement("p");
+		p.innerHTML = "<b>Secondary:</b>";
+		evalbody.appendChild(p);
+
+		let ul = document.createElement("ul");
+		add_gear_evaluation(ul, outbuild.secondary);
+		evalbody.appendChild(ul);
+	}
+
+	if (outbuild.melee)
+	{
+		let p = document.createElement("p");
+		p.innerHTML = "<b>Melee:</b>";
+		evalbody.appendChild(p);
+
+		let ul = document.createElement("ul");
+		add_gear_evaluation(ul, outbuild.melee);
+		add_stat(ul, outbuild.melee.combo_duration, "{}s Combo Duration");
+		evalbody.appendChild(ul);
+	}
+
+	if (evalbody.textContent == "")
+	{
+		evalbody.textContent = "Evaluator is ready.";
+	}
+}
+
 function update_share(share)
 {
 	location.hash = base64url_encode(new Uint8Array(Object.values(share)));

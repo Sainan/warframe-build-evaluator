@@ -59,7 +59,7 @@ function evaluate_build(inbuild, conditionals)
 
 	local build = evaluator.parse_build(inbuild)
 	js_invoke("update_conditionals", evaluator.build_getConditionals(build))
-	document.querySelector("pre").textContent = dumpvar(evaluator.build_applyConditionals(build, conditionals))
+	js_invoke("update_evaluation", evaluator.build_applyConditionals(build, conditionals))
 
 	local share = ""
 	if inbuild.powersuit?.name then
