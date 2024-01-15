@@ -1,38 +1,10 @@
 <title>Warframe Build Evaluator Web UI</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
 
 <script src="https://wasm.pluto.do/out/libpluto/0.8.1/libpluto.js"></script>
 <script src="https://pluto-lang.org/PlutoScript/plutoscript.js"></script>
-
-<style>
-	body
-	{
-		margin: 0;
-		padding: 0;
-		font-family: sans-serif;
-	}
-
-	.grid-item
-	{
-		padding: 8px 16px;
-	}
-
-	@media (min-width: 700px)
-	{
-		.grid
-		{
-			display: flex;
-		}
-
-		.grid-item
-		{
-			width: 50%;
-			height: calc(100vh - 16px);
-			overflow: auto;
-		}
-	}
-</style>
 
 <div class="grid">
 	<div class="grid-item">

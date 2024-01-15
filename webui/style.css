@@ -1,0 +1,26 @@
+body
+{
+	margin: 0;
+	padding: 0;
+	font-family: sans-serif;
+}
+
+.grid-item
+{
+	padding: 8px 16px;
+}
+
+@media (min-width: 700px)
+{
+	.grid
+	{
+		display: flex;
+	}
+
+	.grid-item
+	{
+		width: 50%;
+		height: calc(100vh - 16px);
+		overflow: auto;
+	}
+}
