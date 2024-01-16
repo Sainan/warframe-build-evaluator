@@ -306,7 +306,7 @@ function update_conditionals(conditionals)
 function add_stat(ul, stat, fmt)
 {
 	let li = document.createElement("li");
-	li.textContent = fmt.split("{}").join(stat.toFixed(0));
+	li.textContent = fmt.split("{}").join(stat.toFixed(1));
 	ul.appendChild(li);
 }
 
