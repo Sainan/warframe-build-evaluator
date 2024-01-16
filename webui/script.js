@@ -20,6 +20,7 @@ fetch("../data/ExportUpgrades_en.json")
 		if (!item.uniqueName.includes("/Beginner/") && !item.uniqueName.includes("/Intermediate/")
 			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/WeaponMeleeDamageOnHeavyKillMod"
 			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/Expert/WeaponCritFireRateBonusModExpert"
+			&& item.uniqueName != "/Lotus/Upgrades/Mods/Shotgun/Expert/WeaponFireDamageModExpert"
 			)
 		{
 			if (item.type == "WARFRAME" || item.type == "AURA")
