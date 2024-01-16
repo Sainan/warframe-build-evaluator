@@ -130,6 +130,71 @@ local function gear_getStats(gear, upgrade): table
 	end
 end
 
+local function gear_getPrimaryElementalAdd(gear)
+	local elementals = {}
+	if gear.dmgadd_heat.add then
+		elementals[#elementals + 1] = "heat"
+	end
+	if gear.dmgadd_cold.add then
+		elementals[#elementals + 1] = "cold"
+	end
+	if gear.dmgadd_electricity.add then
+		elementals[#elementals + 1] = "electricity"
+	end
+	if gear.dmgadd_toxin.add then
+		elementals[#elementals + 1] = "toxin"
+	end
+	return elementals
+end
+
+local elemental_mix <const> = {
+	heat = {
+		cold = "blast",
+		electricity = "radiation",
+		toxin = "gas",
+	},
+	cold = {
+		heat = "blast",
+		electricity = "magnetic",
+		toxin = "viral",
+	},
+	electricity = {
+		heat = "radiation",
+		cold = "magnetic",
+		toxin = "corrosive",
+	},
+	toxin = {
+		heat = "gas",
+		cold = "viral",
+		electricity = "corrosive",
+	}
+}
+
+local function gear_addStatOperation(gear, stat_name, operation_type, value)
+	if gear.redirects[stat_name] then
+		stat_name = gear.redirects[stat_name]
+	end
+	stat_addOperation(gear[stat_name], operation_type, value)
+	if stat_name == "dmgadd_heat" or stat_name == "dmgadd_cold" or stat_name == "dmgadd_electricity" or stat_name == "dmgadd_toxin" then
+		assert(operation_type == "ADD")
+		local this_elemental = stat_name:sub(8)
+		for pairs(gear_getPrimaryElementalAdd(gear)) as elemental do
+			if elemental ~= this_elemental then
+				local combined = elemental_mix[this_elemental][elemental]
+
+				gear["dmgadd_"..combined].add = gear[stat_name].add + gear["dmgadd_"..elemental].add
+
+				gear[stat_name].add = nil
+				gear["dmgadd_"..elemental].add = nil
+
+				gear.redirects[stat_name] = "dmgadd_"..combined
+				gear.redirects["dmgadd_"..elemental] = "dmgadd_"..combined
+				break
+			end
+		end
+	end
+end
+
 local function fusion_level_to_rank(qa): int
 	return switch qa do
 		case "QA_VERY_HIGH" -> 10
@@ -207,7 +272,7 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 								})
 							end
 						else
-							stat_addOperation(stat, upgrade.OperationType, upgrade.Value * value_multiplier)
+							gear_addStatOperation(build[gear_name], stat_name, upgrade.OperationType, upgrade.Value * value_multiplier)
 						end
 					end
 				end
@@ -220,15 +285,15 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 				assert(upgrade.ValidType == "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon")
 				local stats = gear_getStats(build.melee, upgrade)
 				for pairs(stats) as stat_name do
-					if stat := build.melee?[stat_name] then
-						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+					if build.melee?[stat_name] then
+						gear_addStatOperation(build.melee, stat_name, upgrade.OperationType, upgrade.Value)
 					end
 				end
 			else
 				local stats = gear_getStats(build[gear_name], upgrade)
 				for pairs(stats) as stat_name do
-					if stat := build[gear_name][stat_name] then
-						stat_addOperation(stat, upgrade.OperationType, upgrade.Value)
+					if build[gear_name][stat_name] then
+						gear_addStatOperation(build[gear_name], stat_name, upgrade.OperationType, upgrade.Value)
 					end
 				end
 			end
@@ -245,6 +310,7 @@ end
 
 local function init_gear(pe_data)
 	return {
+		redirects = {},
 		dmg_impact = { base = pe_data.damagePerShot[1] },
 		dmg_puncture = { base = pe_data.damagePerShot[2] },
 		dmg_slash = { base = pe_data.damagePerShot[3] },
@@ -281,6 +347,7 @@ export function parse_build(inbuild)
 	if inbuild.powersuit?.name then
 		local pe_data = ExportWarframes[inbuild.powersuit.name] or error("Unknown powersuit: "..inbuild.powersuit.name)
 		build.powersuit = {
+			redirects = {},
 			health = { base = pe_data.health },
 			shield = { base = pe_data.shield },
 			armor = { base = pe_data.armor },
@@ -397,41 +464,57 @@ export function parse_build(inbuild)
 			end
 		end
 		if build.powersuit then
+			build.powersuit.redirects = nil
 			build.powersuit.aura_strength = nil
 			build.powersuit.aura_effectiveness = nil
 		end
 	end
-	if inbuild.primary?.mods then
-		for pairs(inbuild.primary.mods) as mod do
-			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
-			if mod_data.ModSet then
-				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
-			end
-			build_applyMod(build, "primary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
-		end
-	end
-	if inbuild.secondary?.mods then
-		for pairs(inbuild.secondary.mods) as mod do
-			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
-			if mod_data.ModSet then
-				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
-			end
-			build_applyMod(build, "secondary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
-		end
-	end
-	if inbuild.melee?.mods then
-		for pairs(inbuild.melee.mods) as mod do
-			local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
-			local set_bonus = 1
-			if mod_data.ModSetValues then
-				local n = get_num_mods_from_set(inbuild.melee.mods, mod_data.ModSet)
-				if n > 1 then
-					set_bonus += mod_data.ModSetValues[n - 1]
+	if inbuild.primary then
+		if inbuild.primary.mods then
+			for pairs(inbuild.primary.mods) as mod do
+				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				if mod_data.ModSet then
+					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 				end
-			elseif mod_data.ModSet then
-				sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+				build_applyMod(build, "primary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
 			end
-			build_applyMod(build, "melee", mod.name, mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
+		end
+		if build.primary then
+			build.primary.redirects = nil
+		end
+	end
+	if inbuild.secondary then
+		if inbuild.secondary.mods then
+			for pairs(inbuild.secondary.mods) as mod do
+				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				if mod_data.ModSet then
+					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+				end
+				build_applyMod(build, "secondary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
+			end
+		end
+		if build.secondary then
+			build.secondary.redirects = nil
+		end
+	end
+	if inbuild.melee then
+		if inbuild.melee.mods then
+			for pairs(inbuild.melee.mods) as mod do
+				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				local set_bonus = 1
+				if mod_data.ModSetValues then
+					local n = get_num_mods_from_set(inbuild.melee.mods, mod_data.ModSet)
+					if n > 1 then
+						set_bonus += mod_data.ModSetValues[n - 1]
+					end
+				elseif mod_data.ModSet then
+					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+				end
+				build_applyMod(build, "melee", mod.name, mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
+			end
+		end
+		if build.melee then
+			build.melee.redirects = nil
 		end
 	end
 	for set, n in pairs(sets) do

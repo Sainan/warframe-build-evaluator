@@ -314,3 +314,18 @@ do
 		}
 	}.secondary.dmg_electricity, 42.8))
 end
+do
+	local build = evaluate_build{
+		secondary = {
+			name = "/Lotus/Weapons/Tenno/Shotgun/Shotgun",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Shotgun/WeaponFireDamageMod", rank = 5 }, -- Incendiary Coat
+				{ name = "/Lotus/Upgrades/Mods/Shotgun/WeaponElectricityDamageMod", rank = 5 }, -- Charged Shell
+				{ name = "/Lotus/Upgrades/Mods/Shotgun/WeaponFreezeDamageMod", rank = 5 }, -- Chilling Grasp
+				{ name = "/Lotus/Upgrades/Mods/Shotgun/DualStat/FireEventShotgunMod", rank = 3 }, -- Scattering Inferno
+			}
+		}
+	}
+	assert(about_equal(build.secondary.dmg_radiation, 60))
+	assert(about_equal(build.secondary.dmg_cold, 22.5))
+end
