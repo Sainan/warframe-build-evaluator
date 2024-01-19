@@ -79,10 +79,13 @@ local function stat_applyConditionals(stat, to_apply)
 end
 
 local function upgrade_type_to_gear_name(upgradeType): ?string
-	return switch upgradeType do
-		case "WEAPON_MELEE_DAMAGE" -> "melee"
-		case "WEAPON_MELEE_COMBO_DURATION_BONUS" -> "melee"
+	if upgradeType:sub(1, 7) == "AVATAR_" then
+		return "powersuit"
 	end
+	if upgradeType:sub(1, 13) == "WEAPON_MELEE_" then
+		return "melee"
+	end
+	return nil
 end
 
 local function valid_type_to_gear_name(validType): ?string
@@ -173,7 +176,7 @@ local elemental_mix <const> = {
 }
 
 local function gear_addStatOperation(gear, stat_name, operation_type, value)
-	if gear.redirects[stat_name] then
+	if gear.redirects?[stat_name] then
 		stat_name = gear.redirects[stat_name]
 	end
 	stat_addOperation(gear[stat_name], operation_type, value)
@@ -246,10 +249,12 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 			end
 		else
 			for pairs(mod.Upgrades) as upgrade do
+				local applied = false
 				local stats = gear_getStats(build[gear_name], upgrade)
 				for pairs(stats) as stat_name do
 					local stat = build[gear_name]?[stat_name]
 					if stat then
+						applied = true
 						if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 							stat_addConditional(stat, {
 								type = upgrade.ValidModifiers[1],
@@ -272,6 +277,17 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 							gear_addStatOperation(build[gear_name], stat_name, upgrade.OperationType, upgrade.Value * value_multiplier)
 						end
 					end
+				end
+				if not applied then
+					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) or valid_type_to_gear_name(upgrade.ValidType) then
+						local upgrade_stats = gear_getStats(build[upgrade_gear_name], upgrade)
+						for pairs(upgrade_stats) as upgrade_stat_name do
+							if stat := build[upgrade_gear_name]?[upgrade_stat_name] then
+								gear_addStatOperation(build[upgrade_gear_name], upgrade_stat_name, upgrade.OperationType, upgrade.Value * value_multiplier)
+							end
+						end
+					end
+
 				end
 			end
 		end
@@ -348,7 +364,6 @@ export function parse_build(inbuild)
 	if inbuild.powersuit?.name then
 		local pe_data = data.powersuits[inbuild.powersuit.name] or error("Unknown powersuit: "..inbuild.powersuit.name)
 		build.powersuit = {
-			redirects = {},
 			health = { base = pe_data.health },
 			shield = { base = pe_data.shield },
 			armor = { base = pe_data.armor },

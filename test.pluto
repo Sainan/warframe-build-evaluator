@@ -283,6 +283,19 @@ do
 	assert(about_equal(build_applyAllConditionals(build).melee.dmg_impact, 39.2))
 	assert(about_equal(build_applyAllConditionals(build).melee.dmg_puncture, 352.8))
 end
+do
+	local build = evaluate_build {
+		powersuit = {
+			name = "/Lotus/Powersuits/Runner/Runner"
+		},
+		primary = {
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/DualSource/Rifle/SerratedRushMod", rank = 10 } -- Amalgam Serration
+			}
+		}
+	}
+	assert(about_equal(build.powersuit.sprint_speed_mps, 13.1)) -- as reported by our own Web UI... the main thing of importance is that this doesn't error, tho.
+end
 
 -- Archon Shards
 do
