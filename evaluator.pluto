@@ -725,3 +725,175 @@ export function enemy_getEffectiveDamage(enemy, level, gear)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "viral", gear.dmg_viral)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "corrosive", gear.dmg_corrosive)
 end
+
+-- Compact Share
+
+local function joaat(str)
+	local hash = 0
+	if str ~= nil then
+		for i = 1, #str do
+			hash = (hash + str:byte(i)) & 0xff_ff_ff_ff
+			hash = (hash + (hash << 10)) & 0xff_ff_ff_ff
+			hash = (hash ~ (hash >> 6)) & 0xff_ff_ff_ff
+		end
+		hash = (hash + (hash << 3)) & 0xff_ff_ff_ff
+		hash = (hash ~ (hash >> 11)) & 0xff_ff_ff_ff
+		hash = (hash + (hash << 15)) & 0xff_ff_ff_ff
+	end
+	return hash
+end
+
+export function powersuit_name_to_id(name)
+	return joaat(name) & 0xff_ff
+end
+
+export function powersuit_id_to_name(id)
+	if id ~= 0 then
+		for key in ExportWarframes do
+			if powersuit_name_to_id(key) == id then
+				return key
+			end
+		end
+	end
+	return nil
+end
+
+export function weapon_name_to_id(name)
+	return joaat(name) & 0xf_ff_ff
+end
+
+export function weapon_id_to_name(id)
+	if id ~= 0 then
+		for key in ExportWeapons do
+			if powersuit_name_to_id(key) == id then
+				return key
+			end
+		end
+	end
+	return nil
+end
+
+export function mod_name_to_id(name)
+	return joaat(name) & 0xf_ff_ff
+end
+
+export function mod_id_to_name(id)
+	if id ~= 0 then
+		for key in overframe_mods do
+			if powersuit_name_to_id(key) == id then
+				return key
+			end
+		end
+	end
+	return nil
+end
+
+local function export_mods(mods)
+	local data = ""
+	if mods then
+		for mods as mod do
+			local id = mod_name_to_id(mod.name)
+			data ..= string.pack("I3", (id << 4) | (mod.rank or 0))
+		end
+	end
+	return string.pack("s1", data)
+end
+
+export function export_build(inbuild)
+	local data = "\x00"
+
+	local id = powersuit_name_to_id(inbuild?.powersuit?.name)
+	data ..= string.pack("I2", id)
+	if id ~= 0 then
+		data ..= string.pack("I1", inbuild?.powersuit?.rank or 30)
+	end
+	data ..= export_mods(inbuild?.powersuit?.mods)
+
+	data ..= string.pack("I3", weapon_name_to_id(inbuild?.primary?.name))
+	data ..= export_mods(inbuild?.primary?.mods)
+
+	data ..= string.pack("I3", weapon_name_to_id(inbuild?.secondary?.name))
+	data ..= export_mods(inbuild?.secondary?.mods)
+
+	data ..= string.pack("I3", weapon_name_to_id(inbuild?.melee?.name))
+	data ..= export_mods(inbuild?.melee?.mods)
+
+	return data
+end
+
+local function import_mods(data, i)
+	local mods = {}
+	local ret_i
+	data, ret_i = string.unpack("s1", data, i)
+
+	i = 1
+	while i < #data do
+		local val
+		val, i = string.unpack("I3", data, i)
+		local mod = {
+			name = mod_id_to_name(val >> 4),
+			rank = val & 0xf
+		}
+		assert(mod.name)
+		mods[#mods + 1] = mod
+	end
+
+	return mods, ret_i
+end
+
+export function import_build(data)
+	assert(data:byte(1) == 0)
+
+	local inbuild = {}
+	local i = 2
+	local id, mods, name
+
+	do
+		local rank
+		id, i = string.unpack("I2", data, i)
+		if id ~= 0 then
+			name = powersuit_id_to_name(id)
+			rank, i = string.unpack("I1", data, i)
+		end
+		mods, i = import_mods(data, i)
+		if name or #mods ~= 0 then
+			inbuild.powersuit = {
+				name = name,
+				rank = rank,
+				mods = mods
+			}
+		end
+	end
+
+	id, i = string.unpack("I3", data, i)
+	mods, i = import_mods(data, i)
+	name = weapon_id_to_name(id)
+	if name or #mods ~= 0 then
+		inbuild.primary = {
+			name = name,
+			mods = mods
+		}
+	end
+
+	id, i = string.unpack("I3", data, i)
+	mods, i = import_mods(data, i)
+	name = weapon_id_to_name(id)
+	if name or #mods ~= 0 then
+		inbuild.secondary = {
+			name = name,
+			mods = mods
+		}
+	end
+
+	id, i = string.unpack("I3", data, i)
+	mods, i = import_mods(data, i)
+	name = weapon_id_to_name(id)
+	if name or #mods ~= 0 then
+		inbuild.melee = {
+			name = name,
+			mods = mods
+		}
+	end
+
+	return inbuild
+end

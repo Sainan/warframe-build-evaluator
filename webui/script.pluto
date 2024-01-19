@@ -9,18 +9,14 @@ end
 -- Load data up-front, because a) Emscripten would die if we tried loading overframe_mods in a single ccall, and b) we need some of this data for the UI.
 do
 	ExportWarframes = js_invoke("fetch_data_json", "ExportWarframes_en").ExportWarframes
-	local i = 0
 	for ExportWarframes as item do
 		if item.name:sub(1, 11) ~= "<ARCHWING> " then
 			js_invoke("add_datalist_option", "datalist-powersuits", item.uniqueName, item.name)
 		end
-		item.id = ++i
 	end
-	assert(i < 0xff)
 	ExportWarframes = optimise_public_export(ExportWarframes)
 
 	ExportWeapons = js_invoke("fetch_data_json", "ExportWeapons_en").ExportWeapons
-	i = 0
 	for ExportWeapons as item do
 		if item.productCategory == "LongGuns" then
 			js_invoke("add_datalist_option", "datalist-primaries", item.uniqueName, item.name)
@@ -29,9 +25,7 @@ do
 		elseif item.productCategory == "Melee" then
 			js_invoke("add_datalist_option", "datalist-melees", item.uniqueName, item.name)
 		end
-		item.id = ++i
 	end
-	assert(i < 0xffff)
 	ExportWeapons = optimise_public_export(ExportWeapons)
 
 	overframe_mods = js_invoke("fetch_data_json", "overframe_mods")
@@ -42,18 +36,6 @@ local evaluator = dofile("/evaluator.pluto")
 
 get_max_rank = evaluator.get_fusion_limit
 
-local function share_mods(mods)
-	local share = ""
-	for mods as mod do
-		if id := overframe_mods[mod.name].id then -- Archon shards currently don't get assigned an id
-			assert(id <= 0xffff)
-			share ..= string.pack("H", id)
-			share ..= string.pack("B", mod.rank)
-		end
-	end
-	return string.pack("s1", share)
-end
-
 function evaluate_build(inbuild, conditionals)
 	js_invoke("update_export", exportvar(inbuild))
 
@@ -61,118 +43,9 @@ function evaluate_build(inbuild, conditionals)
 	js_invoke("update_conditionals", evaluator.build_getConditionals(build))
 	js_invoke("update_evaluation", evaluator.build_applyConditionals(build, conditionals))
 
-	local share = ""
-	if inbuild.powersuit?.name then
-		share ..= string.pack("B", ExportWarframes[inbuild.powersuit.name].id)
-		share ..= share_mods(inbuild.powersuit.mods)
-	elseif inbuild.powersuit?.mods and #inbuild.powersuit.mods ~= 0 then
-		share ..= string.pack("B", 0xff)
-		share ..= share_mods(inbuild.powersuit.mods)
-	else
-		share ..= string.pack("B", 0)
-	end
-	if inbuild.primary?.name then
-		share ..= string.pack("H", ExportWeapons[inbuild.primary.name].id)
-		share ..= share_mods(inbuild.primary.mods)
-	elseif inbuild.primary?.mods and #inbuild.primary.mods ~= 0 then
-		share ..= string.pack("H", 0xffff)
-		share ..= share_mods(inbuild.primary.mods)
-	else
-		share ..= string.pack("H", 0)
-	end
-	if inbuild.secondary?.name then
-		share ..= string.pack("H", ExportWeapons[inbuild.secondary.name].id)
-		share ..= share_mods(inbuild.secondary.mods)
-	elseif inbuild.secondary?.mods and #inbuild.secondary.mods ~= 0 then
-		share ..= string.pack("H", 0xffff)
-		share ..= share_mods(inbuild.secondary.mods)
-	else
-		share ..= string.pack("H", 0)
-	end
-	if inbuild.melee?.name then
-		share ..= string.pack("H", ExportWeapons[inbuild.melee.name].id)
-		share ..= share_mods(inbuild.melee.mods)
-	elseif inbuild.melee?.mods and #inbuild.melee.mods ~= 0 then
-		share ..= string.pack("H", 0xffff)
-		share ..= share_mods(inbuild.melee.mods)
-	else
-		share ..= string.pack("H", 0)
-	end
-	js_invoke("update_share", share:split(""):map(|x| -> x:byte()))
+	js_invoke("update_share", evaluator.export_build(inbuild):split(""):map(|x| -> x:byte()))
 end
 
-local function id_to_name(tbl, id)
-	for key, item in tbl do
-		if item.id == id then
-			return key
-		end
-	end
-end
-
-local function unpack_mods(share, i)
-	local mods = {}
-	local ret_i
-	share, ret_i = string.unpack("s1", share, i)
-
-	i = 1
-	while i < #share do
-		local id, rank
-		id, i = string.unpack("H", share, i)
-		rank, i = string.unpack("B", share, i)
-		local mod = {
-			name = id_to_name(overframe_mods, id),
-			rank = rank
-		}
-		assert(mod.name)
-		mods:insert(mod)
-	end
-
-	return mods, ret_i
-end
-
-function unpack_share(share)
-	local build = {}
-	local id
-	local i = 1
-
-	id, i = string.unpack("B", share, i)
-	if id ~= 0 then
-		build.powersuit = {}
-		if id ~= 0xff then
-			build.powersuit.name = id_to_name(ExportWarframes, id)
-			assert(build.powersuit.name)
-		end
-		build.powersuit.mods, i = unpack_mods(share, i)
-	end
-	id, i = string.unpack("H", share, i)
-	if id ~= 0 then
-		build.primary = {}
-		if id ~= 0xffff then
-			build.primary.name = id_to_name(ExportWeapons, id)
-			assert(build.primary.name)
-		end
-		build.primary.mods, i = unpack_mods(share, i)
-	end
-	id, i = string.unpack("H", share, i)
-	if id ~= 0 then
-		build.secondary = {}
-		if id ~= 0xffff then
-			build.secondary.name = id_to_name(ExportWeapons, id)
-			assert(build.secondary.name)
-		end
-		build.secondary.mods, i = unpack_mods(share, i)
-	end
-	id, i = string.unpack("H", share, i)
-	if id ~= 0 then
-		build.melee = {}
-		if id ~= 0xffff then
-			build.melee.name = id_to_name(ExportWeapons, id)
-			assert(build.melee.name)
-		end
-		build.melee.mods, i = unpack_mods(share, i)
-	end
-
-	return build
-end
+unpack_share = evaluator.import_build
 
 js_invoke("ready_to_evaluate")

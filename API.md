@@ -84,3 +84,11 @@ build_applyConditionals(build, {
 #### `get_fusion_limit(string): int`
 
 Returns the max rank of the mod with the given uniquename.
+
+### Compact Share
+
+#### `export_build(Inbuild): string`
+
+Note that the resulting string is binary data.
+
+#### `import_build(string): Inbuild`
