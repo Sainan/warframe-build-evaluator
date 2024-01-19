@@ -395,6 +395,8 @@ function update_evaluation(outbuild)
 		add_stat(ul, outbuild.powersuit.ability_efficiency * 100, "{}% Ability Efficiency");
 		add_stat(ul, outbuild.powersuit.ability_range * 100, "{}% Ability Range");
 		add_stat(ul, outbuild.powersuit.ability_strength * 100, "{}% Ability Strength");
+		add_stat(ul, outbuild.powersuit.movement_speed_mps, "{}m/s Movement Speed")
+		add_stat(ul, outbuild.powersuit.sprint_speed_mps, "{}m/s Sprint Speed")
 		evalbody.appendChild(ul);
 	}
 
