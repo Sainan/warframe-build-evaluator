@@ -1,8 +1,10 @@
-local { powersuit_name_to_id, weapon_name_to_id, mod_name_to_id } = require "evaluator"
+local { init, data, powersuit_name_to_id, weapon_name_to_id, mod_name_to_id } = require "evaluator"
+
+init()
 
 do
 	local set = { [0] = "reserved" }
-	for key in ExportWarframes do
+	for key in data.powersuits do
 		local id = powersuit_name_to_id(key)
 		if set[id] then
 			print("COLLISION: "..key.." has id "..id.." but that's already "..set[id])
@@ -14,7 +16,7 @@ end
 
 do
 	local set = { [0] = "reserved" }
-	for key in ExportWeapons do
+	for key in data.weapons do
 		local id = weapon_name_to_id(key)
 		if set[id] then
 			print("COLLISION: "..key.." has id "..id.." but that's already "..set[id])
@@ -26,7 +28,7 @@ end
 
 do
 	local set = { [0] = "reserved" }
-	for key in overframe_mods do
+	for key in data.mods do
 		local id = mod_name_to_id(key)
 		if set[id] then
 			print("COLLISION: "..key.." has id "..id.." but that's already "..set[id])

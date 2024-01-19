@@ -2,7 +2,7 @@
 
 Warframe Build Evaluator is written in Pluto, but can be compiled to Lua VM-compatible bytecode. You can download it pre-compiled from [the Github action artifacts](https://github.com/Sainan/warframe-build-evaluator/actions/workflows/test.yml).
 
-Note that the evaluator depends on some data, which is loaded in via `dofile` if the globals were not already defined. Look at `evaluator.pluto` for more information.
+Note that the evaluator depends on `data.json` in this repository. By default, this is automatically loaded in via `dofile("data.json.lua")` when you attempt to parse a build. However, you can also call the `init` function yourself.
 
 ## Concepts
 

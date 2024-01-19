@@ -1,30 +1,33 @@
 -- @pluto_warnings enable-non-portable-bytecode
 
-if not ExportWarframes then
-	ExportWarframes = dofile("data/ExportWarframes_en.json.lua")
-end
-if not ExportWeapons then
-	ExportWeapons = dofile("data/ExportWeapons_en.json.lua")
-end
-if not overframe_mods then
-	overframe_mods = dofile("data/overframe_mods.json.lua")
-end
-if not overframe_modsets then
-	overframe_modsets = dofile("data/overframe_modsets.json.lua")
+export data = {}
+
+export function is_inited(): bool
+	return data.powersuits ~= nil
 end
 
 local function add_archon_shard(name, upgrade, operation, value)
 	name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/"..name
-	overframe_mods[name] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value } } } }
-	overframe_mods[name.."Mythic"] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value * 1.5 } } } }
+	data.mods[name] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value } } } }
+	data.mods[name.."Mythic"] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value * 1.5 } } } }
 end
 
-add_archon_shard("ArchonCrystalUpgradeWarframeHealthMax", "AVATAR_HEALTH_MAX", "ADD", 150)
+export function init(new_data: ?table)
+	if not new_data then
+		new_data = dofile("data.json.lua")
+	end
+	data.mods = new_data.mods
+	data.sub_upgrades = new_data.sub_upgrades
+	data.modsets = new_data.modsets
+	data.powersuits = new_data.powersuits
+	data.weapons = new_data.weapons
+	add_archon_shard("ArchonCrystalUpgradeWarframeHealthMax", "AVATAR_HEALTH_MAX", "ADD", 150)
+end
 
 local function get_num_mods_from_set(mods, set)
 	local n = 0
 	for pairs(mods) as mod do
-		if (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data.ModSet == set then
+		if (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data.ModSet == set then
 			++n
 		end
 	end
@@ -205,7 +208,7 @@ local function fusion_level_to_rank(qa): int
 end
 
 export function get_fusion_limit(mod): int
-	local mod_data = (overframe_mods[mod] or error("Unknown mod: "..mod)).data
+	local mod_data = (data.mods[mod] or error("Unknown mod: "..mod)).data
 	return mod_data.FusionLimit ? fusion_level_to_rank(mod_data.FusionLimit) : 5
 end
 
@@ -301,8 +304,8 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 	end
 	if mod.SubUpgrades then
 		for pairs(mod.SubUpgrades) as sub_upgrade do
-			if type(sub_upgrade) == "table" then
-				build_applyMod(build, gear_name, mod_name, sub_upgrade, rank, value_multiplier)
+			if sub_mod := data.sub_upgrades[sub_upgrade] then
+				build_applyMod(build, gear_name, mod_name, sub_mod.data, rank, value_multiplier)
 			end
 		end
 	end
@@ -343,9 +346,13 @@ local function init_gear(pe_data)
 end
 
 export function parse_build(inbuild)
+	if not is_inited() then
+		init()
+	end
+
 	local build = {}
 	if inbuild.powersuit?.name then
-		local pe_data = ExportWarframes[inbuild.powersuit.name] or error("Unknown powersuit: "..inbuild.powersuit.name)
+		local pe_data = data.powersuits[inbuild.powersuit.name] or error("Unknown powersuit: "..inbuild.powersuit.name)
 		build.powersuit = {
 			redirects = {},
 			health = { base = pe_data.health },
@@ -426,13 +433,13 @@ export function parse_build(inbuild)
 		end
 	end
 	if inbuild.primary?.name then
-		build.primary = init_gear(ExportWeapons[inbuild.primary.name])
+		build.primary = init_gear(data.weapons[inbuild.primary.name])
 	end
 	if inbuild.secondary?.name then
-		build.secondary = init_gear(ExportWeapons[inbuild.secondary.name])
+		build.secondary = init_gear(data.weapons[inbuild.secondary.name])
 	end
 	if inbuild.melee?.name then
-		local pe_data = ExportWeapons[inbuild.melee.name]
+		local pe_data = data.weapons[inbuild.melee.name]
 		build.melee = init_gear(pe_data)
 		build.melee.combo_duration = { base = pe_data.comboDuration }
 	end
@@ -441,7 +448,7 @@ export function parse_build(inbuild)
 		if inbuild.powersuit.mods then
 			local aura_mod
 			for pairs(inbuild.powersuit.mods) as mod do
-				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				local set_bonus = 1
 				if mod_data.ModSetValues then
 					local n = get_num_mods_from_set(inbuild.powersuit.mods, mod_data.ModSet)
@@ -452,7 +459,7 @@ export function parse_build(inbuild)
 					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 				end
 				local value_multiplier = ((mod.rank or 0) + 1) * set_bonus
-				if mod_data.ItemCompatibilityLocTag == "/Lotus/Language/Menu/CategoryAura" then
+				if data.mods[mod.name].type == "AURA" then
 					-- Save aura mod for later so aura strength can be applied
 					aura_mod = { name = mod.name, data = mod_data, rank = mod.rank, mult = value_multiplier }
 				else
@@ -472,7 +479,7 @@ export function parse_build(inbuild)
 	if inbuild.primary then
 		if inbuild.primary.mods then
 			for pairs(inbuild.primary.mods) as mod do
-				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				if mod_data.ModSet then
 					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 				end
@@ -486,7 +493,7 @@ export function parse_build(inbuild)
 	if inbuild.secondary then
 		if inbuild.secondary.mods then
 			for pairs(inbuild.secondary.mods) as mod do
-				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				if mod_data.ModSet then
 					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
 				end
@@ -500,7 +507,7 @@ export function parse_build(inbuild)
 	if inbuild.melee then
 		if inbuild.melee.mods then
 			for pairs(inbuild.melee.mods) as mod do
-				local mod_data = (overframe_mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
 				local set_bonus = 1
 				if mod_data.ModSetValues then
 					local n = get_num_mods_from_set(inbuild.melee.mods, mod_data.ModSet)
@@ -518,7 +525,7 @@ export function parse_build(inbuild)
 		end
 	end
 	for set, n in pairs(sets) do
-		build_applyMod(build, nil, set, overframe_modsets[set].data, n, n)
+		build_applyMod(build, nil, set, data.modsets[set].data, n, n)
 	end
 	return build
 end
@@ -749,7 +756,7 @@ end
 
 export function powersuit_id_to_name(id)
 	if id ~= 0 then
-		for key in pairs(ExportWarframes) do
+		for key in pairs(data.powersuits) do
 			if powersuit_name_to_id(key) == id then
 				return key
 			end
@@ -764,7 +771,7 @@ end
 
 export function weapon_id_to_name(id)
 	if id ~= 0 then
-		for key in pairs(ExportWeapons) do
+		for key in pairs(data.weapons) do
 			if powersuit_name_to_id(key) == id then
 				return key
 			end
@@ -779,7 +786,7 @@ end
 
 export function mod_id_to_name(id)
 	if id ~= 0 then
-		for key in pairs(overframe_mods) do
+		for key in pairs(data.mods) do
 			if powersuit_name_to_id(key) == id then
 				return key
 			end
@@ -787,6 +794,9 @@ export function mod_id_to_name(id)
 	end
 	return nil
 end
+
+-- We use the name 'data' here to refer to the binary data, not our data table.
+-- @pluto_warnings disable-var-shadow
 
 local function export_mods(mods)
 	local data = ""

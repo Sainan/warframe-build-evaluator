@@ -5,73 +5,80 @@ document.querySelectorAll("[data-repeat-count]").forEach(elm => {
 	}
 });
 
-function create_item_option(item)
-{
-	let option = document.createElement("option");
-	option.setAttribute("data-key", item.uniqueName);
-	option.value = item.name;
-	return option;
-}
-
-fetch("../data/ExportUpgrades_en.json")
-.then(response => response.json())
-.then(data => {
-	data.ExportUpgrades.forEach(item => {
-		if (!item.uniqueName.includes("/Beginner/") && !item.uniqueName.includes("/Intermediate/")
-			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/WeaponMeleeDamageOnHeavyKillMod"
-			&& item.uniqueName != "/Lotus/Upgrades/Mods/Melee/Expert/WeaponCritFireRateBonusModExpert"
-			&& item.uniqueName != "/Lotus/Upgrades/Mods/Shotgun/Expert/WeaponFireDamageModExpert"
-			)
-		{
-			if (item.type == "WARFRAME" || item.type == "AURA")
-			{
-				document.getElementById("datalist-powersuit-mods").appendChild(create_item_option(item));
-			}
-			else if (item.type == "PRIMARY")
-			{
-				document.getElementById("datalist-primary-mods").appendChild(create_item_option(item));
-			}
-			else if (item.type == "SECONDARY")
-			{
-				document.getElementById("datalist-secondary-mods").appendChild(create_item_option(item));
-			}
-			else if (item.type == "MELEE")
-			{
-				document.getElementById("datalist-melee-mods").appendChild(create_item_option(item));
-			}
-		}
-	});
-
-	fetch("../data/ExportRelicArcane_en.json")
-	.then(response => response.json())
-	.then(data => {
-		data.ExportRelicArcane.forEach(item => {
-			if (item.levelStats && !item.excludeFromCodex)
-			{
-				document.getElementById("datalist-powersuit-mods").appendChild(create_item_option(item));
-				document.getElementById("datalist-primary-mods").appendChild(create_item_option(item));
-				document.getElementById("datalist-secondary-mods").appendChild(create_item_option(item));
-				document.getElementById("datalist-melee-mods").appendChild(create_item_option(item));
-			}
-		});
-	});
-});
-
-function fetch_data_json(name)
-{
-	return new Promise(resolve => {
-		fetch("../data/" + name + ".json")
-		.then(response => response.json())
-		.then(data => resolve(data));
-	});
-}
-
-function add_datalist_option(datalist, key, value)
+function create_option(key, value)
 {
 	let option = document.createElement("option");
 	option.setAttribute("data-key", key);
 	option.value = value;
-	document.getElementById(datalist).appendChild(option);
+	return option;
+}
+
+var data_promise = new Promise(resolve => {
+	fetch("../data.json")
+	.then(response => response.json())
+	.then(data => resolve(data));
+});
+
+data_promise.then(data => {
+	Object.keys(data.mods).forEach(key => {
+		let item = data.mods[key];
+		if (!item.exclude)
+		{
+			if (item.type)
+			{
+				if (item.type == "WARFRAME" || item.type == "AURA")
+				{
+					document.getElementById("datalist-powersuit-mods").appendChild(create_option(key, item.name));
+				}
+				else if (item.type == "PRIMARY")
+				{
+					document.getElementById("datalist-primary-mods").appendChild(create_option(key, item.name));
+				}
+				else if (item.type == "SECONDARY")
+				{
+					document.getElementById("datalist-secondary-mods").appendChild(create_option(key, item.name));
+				}
+				else if (item.type == "MELEE")
+				{
+					document.getElementById("datalist-melee-mods").appendChild(create_option(key, item.name));
+				}
+			}
+			else
+			{
+				document.getElementById("datalist-powersuit-mods").appendChild(create_option(key, item.name));
+				document.getElementById("datalist-primary-mods").appendChild(create_option(key, item.name));
+				document.getElementById("datalist-secondary-mods").appendChild(create_option(key, item.name));
+				document.getElementById("datalist-melee-mods").appendChild(create_option(key, item.name));
+			}
+		}
+	});
+	Object.keys(data.powersuits).forEach(key => {
+		let item = data.powersuits[key];
+		if (item.name.substr(0, 11) != "<ARCHWING> ")
+		{
+			document.getElementById("datalist-powersuits").appendChild(create_option(key, item.name));
+		}
+	});
+	Object.keys(data.weapons).forEach(key => {
+		let item = data.weapons[key];
+		if (item.productCategory == "LongGuns")
+		{
+			document.getElementById("datalist-primaries").appendChild(create_option(key, item.name));
+		}
+		else if (item.productCategory == "Pistols")
+		{
+			document.getElementById("datalist-secondaries").appendChild(create_option(key, item.name));
+		}
+		else if (item.productCategory == "Melee")
+		{
+			document.getElementById("datalist-melees").appendChild(create_option(key, item.name));
+		}
+	});
+});
+
+function get_data()
+{
+	return data_promise;
 }
 
 function get_key(input)

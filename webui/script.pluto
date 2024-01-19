@@ -1,38 +1,6 @@
-local function optimise_public_export(data)
-	local optimised = {}
-	for data as item do
-		optimised[item.uniqueName] = item
-	end
-	return optimised
-end
-
--- Load data up-front, because a) Emscripten would die if we tried loading overframe_mods in a single ccall, and b) we need some of this data for the UI.
-do
-	ExportWarframes = js_invoke("fetch_data_json", "ExportWarframes_en").ExportWarframes
-	for ExportWarframes as item do
-		if item.name:sub(1, 11) ~= "<ARCHWING> " then
-			js_invoke("add_datalist_option", "datalist-powersuits", item.uniqueName, item.name)
-		end
-	end
-	ExportWarframes = optimise_public_export(ExportWarframes)
-
-	ExportWeapons = js_invoke("fetch_data_json", "ExportWeapons_en").ExportWeapons
-	for ExportWeapons as item do
-		if item.productCategory == "LongGuns" then
-			js_invoke("add_datalist_option", "datalist-primaries", item.uniqueName, item.name)
-		elseif item.productCategory == "Pistols" then
-			js_invoke("add_datalist_option", "datalist-secondaries", item.uniqueName, item.name)
-		elseif item.productCategory == "Melee" then
-			js_invoke("add_datalist_option", "datalist-melees", item.uniqueName, item.name)
-		end
-	end
-	ExportWeapons = optimise_public_export(ExportWeapons)
-
-	overframe_mods = js_invoke("fetch_data_json", "overframe_mods")
-	overframe_modsets = js_invoke("fetch_data_json", "overframe_modsets")
-end
-
 local evaluator = dofile("/evaluator.pluto")
+
+evaluator.init(js_invoke("get_data"))
 
 get_max_rank = evaluator.get_fusion_limit
 
