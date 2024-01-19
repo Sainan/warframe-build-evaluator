@@ -109,6 +109,8 @@ local function gear_getStats(gear, upgrade): table
 		case "AVATAR_AURA_STRENGTH" -> { "aura_strength" }
 		case "AVATAR_AURA_EFFECTIVENESS_ON_ME" -> { "aura_effectiveness" }
 		case "GAMEPLAY_POWER_TO_HEALTH_ON_DEATH" -> { "power_to_health_efficiency" }
+		case "AVATAR_MOVEMENT_SPEED" -> { "movement_speed" }
+		case "AVATAR_SPRINT_SPEED" -> { "sprint_speed" }
 		case "WEAPON_DAMAGE_AMOUNT", "WEAPON_MELEE_DAMAGE" -> { "dmg_impact", "dmg_puncture", "dmg_slash", "dmg_heat", "dmg_cold", "dmg_electricity", "dmg_toxin", "dmg_blast", "dmg_radiation", "dmg_gas", "dmg_magnetic", "dmg_viral", "dmg_corrosive" }
 		case "WEAPON_PERCENT_BASE_DAMAGE_ADDED" -> switch upgrade.DamageType do
 			case "DT_IMPACT" -> { "dmgadd_impact" }
@@ -359,6 +361,8 @@ export function parse_build(inbuild)
 			shield = { base = pe_data.shield },
 			armor = { base = pe_data.armor },
 			power = { base = pe_data.power },
+			movement_speed = { base = pe_data.speed },
+			sprint_speed = { base = pe_data.speed },
 			ability_duration = { base = 1 },
 			ability_efficiency = { base = 1 },
 			ability_range = { base = 1 },
@@ -626,6 +630,8 @@ export function build_applyConditionals(build, to_apply)
 		outbuild.powersuit.effective_health = outbuild.powersuit.health / (1 - outbuild.powersuit.armor_damage_reduction)
 		outbuild.powersuit.effective_power_health = outbuild.powersuit.power_health / (1 - outbuild.powersuit.armor_damage_reduction)
 		outbuild.powersuit.effective_health_incl_power = outbuild.powersuit.effective_health + outbuild.powersuit.effective_power_health
+		outbuild.powersuit.movement_speed_mps = outbuild.powersuit.movement_speed * 6
+		outbuild.powersuit.sprint_speed_mps = outbuild.powersuit.sprint_speed * 7.5
 	end
 	if outbuild.primary then
 		finalise_dmg(outbuild.primary)
