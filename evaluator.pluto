@@ -749,7 +749,7 @@ end
 
 export function powersuit_id_to_name(id)
 	if id ~= 0 then
-		for key in ExportWarframes do
+		for key in pairs(ExportWarframes) do
 			if powersuit_name_to_id(key) == id then
 				return key
 			end
@@ -764,7 +764,7 @@ end
 
 export function weapon_id_to_name(id)
 	if id ~= 0 then
-		for key in ExportWeapons do
+		for key in pairs(ExportWeapons) do
 			if powersuit_name_to_id(key) == id then
 				return key
 			end
@@ -779,7 +779,7 @@ end
 
 export function mod_id_to_name(id)
 	if id ~= 0 then
-		for key in overframe_mods do
+		for key in pairs(overframe_mods) do
 			if powersuit_name_to_id(key) == id then
 				return key
 			end
