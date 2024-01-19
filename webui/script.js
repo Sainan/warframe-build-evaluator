@@ -99,13 +99,19 @@ function initial_evaluation()
 	});
 }
 
-function unpack_mods(elm, mods)
+function unpack_mods(elms, mods)
 {
-	elm.forEach((input, i) => {
-		if (mods[i])
+	var mod_i = 0, crystal_i = 0;
+	Object.values(mods).forEach(mod => {
+		if (mod.name.substr(0, 52) == "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/")
 		{
-			set_key(input, mods[i].name);
-			input.parentNode.querySelector("input[type='number']").valueAsNumber = mods[i].rank;
+			set_key(document.querySelectorAll("input[list='datalist-crystals']")[crystal_i++], mod.name);
+		}
+		else
+		{
+			set_key(elms[mod_i], mod.name);
+			elms[mod_i].parentNode.querySelector("input[type='number']").valueAsNumber = mod.rank;
+			++mod_i;
 		}
 	});
 }
