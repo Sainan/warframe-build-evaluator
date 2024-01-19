@@ -772,7 +772,7 @@ end
 export function weapon_id_to_name(id)
 	if id ~= 0 then
 		for key in pairs(data.weapons) do
-			if powersuit_name_to_id(key) == id then
+			if weapon_name_to_id(key) == id then
 				return key
 			end
 		end
@@ -787,7 +787,7 @@ end
 export function mod_id_to_name(id)
 	if id ~= 0 then
 		for key in pairs(data.mods) do
-			if powersuit_name_to_id(key) == id then
+			if mod_name_to_id(key) == id then
 				return key
 			end
 		end
