@@ -67,6 +67,11 @@ Returns a table of conditional_name-conditional pairs.
 
 A conditional contains "type", "source", "max_stacks" and "proc_chance".
 
+The conditional_name will be the name of the mod that contains it most of the time. The only exceptions to this are:
+- `/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition` for Combo (0-11)
+- `PM_HEAVY_MELEE` for Heavy Attacks
+- `CC_SLIDING` for Slide Attacks
+
 #### `build_applyConditionals(Build, table): Outbuild`
 
 The table of conditionals should contain conditional_name-stacks pairs.

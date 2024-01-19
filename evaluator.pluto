@@ -50,12 +50,9 @@ local function stat_addConditional(stat, conditional)
 		stat.conditionals = {}
 	end
 
-	if (conditional.proc_chance and conditional.proc_chance ~= 1)
-		or (conditional.max_stacks and conditional.max_stacks ~= 1 and conditional.type ~= "/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition")
-	then
-		conditional.name = conditional.source
-	else
-		conditional.name = conditional.type
+	conditional.name = switch conditional.type do
+		case "/Lotus/Upgrades/CosmeticEnhancers/Offensive/OnComboTierCondition", "PM_HEAVY_MELEE", "CC_SLIDING" -> conditional.type
+		default -> conditional.source
 	end
 
 	stat.conditionals[#stat.conditionals + 1] = conditional
