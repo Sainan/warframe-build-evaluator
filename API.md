@@ -37,7 +37,7 @@ An example inbuild:
 
 ### Build
 
-This is the type returned by `parse_build`. For API purposes, this type is transparent and should only be used to call the designated functions.
+This is the type returned by `parse_build`. For API purposes, this type is opaque and should only be used to call the designated functions.
 
 ### Outbuild
 
