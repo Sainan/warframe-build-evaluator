@@ -6,12 +6,6 @@ export function is_inited(): bool
 	return data.powersuits ~= nil
 end
 
-local function add_archon_shard(name, upgrade, operation, value)
-	name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/"..name
-	data.mods[name] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value } } } }
-	data.mods[name.."Mythic"] = { data = { Upgrades = { { UpgradeType = upgrade, OperationType = operation, Value = value * 1.5 } } } }
-end
-
 export function init(new_data: ?table)
 	if not new_data then
 		new_data = dofile("data.json.lua")
@@ -21,7 +15,6 @@ export function init(new_data: ?table)
 	data.modsets = new_data.modsets
 	data.powersuits = new_data.powersuits
 	data.weapons = new_data.weapons
-	add_archon_shard("ArchonCrystalUpgradeWarframeHealthMax", "AVATAR_HEALTH_MAX", "ADD", 150)
 end
 
 local function get_num_mods_from_set(mods, set)
