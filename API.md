@@ -49,23 +49,25 @@ Gear will only be present here if it was provided in the Inbuild with a "name" f
 
 ## Functions
 
-### `evaluate_build(Inbuild): Outbuild`
+### Builds
+
+#### `evaluate_build(Inbuild): Outbuild`
 
 Does the same as `build_applyNoConditionals(parse_build(Inbuild))`.
 
-### `parse_build(Inbuild): Build`
+#### `parse_build(Inbuild): Build`
 
-### `build_applyNoConditionals(Build): Outbuild`
+#### `build_applyNoConditionals(Build): Outbuild`
 
-### `build_applyAllConditionals(Build): Outbuild`
+#### `build_applyAllConditionals(Build): Outbuild`
 
-### `build_getConditionals(Build): table`
+#### `build_getConditionals(Build): table`
 
 Returns a table of conditional_name-conditional pairs.
 
 A conditional contains "type", "source", "max_stacks" and "proc_chance".
 
-### `build_applyConditionals(Build, table): Outbuild`
+#### `build_applyConditionals(Build, table): Outbuild`
 
 The table of conditionals should contain conditional_name-stacks pairs.
 
@@ -77,6 +79,8 @@ build_applyConditionals(build, {
 })
 ```
 
-### `get_fusion_limit(string): int`
+### Utility
+
+#### `get_fusion_limit(string): int`
 
 Returns the max rank of the mod with the given uniquename.
