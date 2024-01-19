@@ -84,12 +84,6 @@ build_applyConditionals(build, {
 })
 ```
 
-### Utility
-
-#### `get_fusion_limit(string): int`
-
-Returns the max rank of the mod with the given uniquename.
-
 ### Compact Share
 
 #### `export_build(Inbuild): string`

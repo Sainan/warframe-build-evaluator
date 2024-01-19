@@ -2,7 +2,7 @@ local evaluator = dofile("/evaluator.pluto")
 
 evaluator.init(js_invoke("get_data"))
 
-get_max_rank = evaluator.get_fusion_limit
+get_max_rank = |mod| -> evaluator.data.mods[mod].fusion_limit
 
 function evaluate_build(inbuild, conditionals)
 	js_invoke("update_export", exportvar(inbuild))

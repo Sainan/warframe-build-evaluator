@@ -206,11 +206,6 @@ local function fusion_level_to_rank(qa): int
 	end
 end
 
-export function get_fusion_limit(mod): int
-	local mod_data = (data.mods[mod] or error("Unknown mod: "..mod)).data
-	return mod_data.FusionLimit ? fusion_level_to_rank(mod_data.FusionLimit) : 5
-end
-
 local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0, value_multiplier = 1)
 	if mod.Upgrades then
 		if mod.ConditionalUpgrades then
