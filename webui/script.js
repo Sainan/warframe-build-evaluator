@@ -368,28 +368,28 @@ function update_evaluation(outbuild)
 		let ul = document.createElement("ul");
 		{
 			let li = document.createElement("li");
-			li.textContent = outbuild.powersuit.effective_health_incl_power.toFixed(0) + " Effective Health";
+			li.textContent = outbuild.powersuit.effective_health_incl_power.toFixed(1) + " Effective Health";
 			{
 				let nested_ul = document.createElement("ul");
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = outbuild.powersuit.health.toFixed(0) + " Health";
+					nested_li.textContent = outbuild.powersuit.health.toFixed(1) + " Health";
 					nested_ul.appendChild(nested_li);
 				}
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = outbuild.powersuit.armor.toFixed(0) + " Armor reduces " + (outbuild.powersuit.armor_damage_reduction * 100).toFixed(0) + "% of incoming damage";
+					nested_li.textContent = outbuild.powersuit.armor.toFixed(1) + " Armor reduces " + (outbuild.powersuit.armor_damage_reduction * 100).toFixed(1) + "% of incoming damage";
 					nested_ul.appendChild(nested_li);
 				}
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = outbuild.powersuit.power.toFixed(0) + " Energy can be converted to health with " + (outbuild.powersuit.power_to_health_efficiency * 100).toFixed(0) + "% efficiency";
+					nested_li.textContent = outbuild.powersuit.power.toFixed(1) + " Energy can be converted to health with " + (outbuild.powersuit.power_to_health_efficiency * 100).toFixed(0) + "% efficiency";
 					nested_ul.appendChild(nested_li);
 				}
 				if (outbuild.powersuit.heal_rate != 0)
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = "+ " + outbuild.powersuit.heal_rate.toFixed(0) + " Health regenerated per second";
+					nested_li.textContent = "+ " + outbuild.powersuit.heal_rate.toFixed(1) + " Health regenerated per second";
 					nested_ul.appendChild(nested_li);
 				}
 				li.appendChild(nested_ul);
