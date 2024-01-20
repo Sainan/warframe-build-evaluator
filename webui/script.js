@@ -331,6 +331,26 @@ function add_opt_stat(ul, stat, fmt)
 	}
 }
 
+function format_crit_tier(tier)
+{
+	if (tier == 0)
+	{
+		return "T0";
+	}
+	else if (tier == 1)
+	{
+		return '<span style="color:yellow">T1</span>';
+	}
+	else if (tier == 2)
+	{
+		return '<span style="color:orange">T2</span>';
+	}
+	else
+	{
+		return '<span style="color:red">T' + tier + '!'.repeat(tier - 3) + '</span>';
+	}
+}
+
 function add_gear_evaluation(ul, gear)
 {
 	add_opt_stat(ul, gear.dmg_impact, "{} Impact");
@@ -351,7 +371,30 @@ function add_gear_evaluation(ul, gear)
 		li.textContent = gear.fire_rate.toFixed(2) + (gear.combo_duration ? " Attack Speed" : " Fire Rate");
 		ul.appendChild(li);
 	}
-	add_stat(ul, gear.crit_chance * 100, "{}% Critical Chance");
+	{
+		let li = document.createElement("li");
+		li.textContent = (gear.crit_chance * 100).toFixed(1) + "% Critical Chance";
+		{
+			let nested_ul = document.createElement("ul");
+			{
+				let nested_li = document.createElement("li");
+				nested_li.innerHTML = (gear.crit_tier_chance * 100).toFixed(1) + "% Chance for " + format_crit_tier(gear.crit_tier) + " @ " + gear.crit_tier_damage.toFixed(1) + "x";
+				nested_ul.appendChild(nested_li);
+			}
+			{
+				let nested_li = document.createElement("li");
+				nested_li.innerHTML = (gear.crit_fail_tier_chance * 100).toFixed(1) + "% Chance for " + format_crit_tier(gear.crit_fail_tier) + " @ " + gear.crit_fail_tier_damage.toFixed(1) + "x";
+				nested_ul.appendChild(nested_li);
+			}
+			{
+				let nested_li = document.createElement("li");
+				nested_li.textContent = gear.crit_damage_avg.toFixed(2) + "x Average Multiplier";
+				nested_ul.appendChild(nested_li);
+			}
+			li.appendChild(nested_ul);
+		}
+		ul.appendChild(li);
+	}
 }
 
 function update_evaluation(outbuild)
