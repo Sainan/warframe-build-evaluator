@@ -86,9 +86,9 @@ build_applyConditionals(build, {
 
 ### Enemies
 
-#### `get_enemy(string): ?Enemy`
+#### `calculate_damage(string enemy, int level, Outbuild.gear): table`
 
-#### `enemy_getEffectiveDamage(Enemy, int level, Outbuild.gear): number`
+The resulting table contains "normal" and "crit" fields for non-critical and critical damage, respectively.
 
 For example, to check the amount of damage dealt by a single Strun pellet with Point Blank R5 against a Lancer's body:
 
@@ -101,8 +101,8 @@ local outbuild = evaluate_build {
         }
     }
 }
-local lancer = get_enemy("/Lotus/Types/Enemies/Grineer/AIWeek/Avatars/RifleLancerAvatar")
-print(enemy_getEffectiveDamage(lancer, 100, outbuild.primary)) -- 9.273...
+local lancer = "/Lotus/Types/Enemies/Grineer/AIWeek/Avatars/RifleLancerAvatar"
+print(calculate_damage(lancer, 100, outbuild.primary).normal) -- 9.273...
 ```
 
 ### Compact Share

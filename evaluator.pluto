@@ -675,10 +675,6 @@ end
 
 -- Evaluation for damage against enemies
 
-export function get_enemy(name)
-	return data.enemies[name]
-end
-
 local function level_scaling_trans(base_level, start, _end, level)
 	if level - base_level < start then
 		return 0
@@ -707,20 +703,28 @@ local function enemy_getEffectiveDamageOfType(enemy, level, damage_type, amount)
 	return amount * (1 + health_offset) * (1 + armor_offset) * 300 / (300 + armor * (1 - armor_offset))
 end
 
-export function enemy_getEffectiveDamage(enemy, level, gear)
-	return enemy_getEffectiveDamageOfType(enemy, level, "DT_IMPACT", gear.dmg_impact)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_PUNCTURE", gear.dmg_puncture)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_SLASH", gear.dmg_slash)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_FIRE", gear.dmg_heat)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_FREEZE", gear.dmg_cold)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_ELECTRICITY", gear.dmg_electricity)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_POISON", gear.dmg_toxin)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_EXPLOSION", gear.dmg_blast)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_RADIANT", gear.dmg_radiation)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_GAS", gear.dmg_gas)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_MAGNETIC", gear.dmg_magnetic)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_VIRAL", gear.dmg_viral)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_CORROSIVE", gear.dmg_corrosive)
+local function enemy_getEffectiveDamage(enemy, level, gear, dmg_multiplier)
+	return enemy_getEffectiveDamageOfType(enemy, level, "DT_IMPACT", gear.dmg_impact * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_PUNCTURE", gear.dmg_puncture * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_SLASH", gear.dmg_slash * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_FIRE", gear.dmg_heat * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_FREEZE", gear.dmg_cold * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_ELECTRICITY", gear.dmg_electricity * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_POISON", gear.dmg_toxin * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_EXPLOSION", gear.dmg_blast * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_RADIANT", gear.dmg_radiation * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_GAS", gear.dmg_gas * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_MAGNETIC", gear.dmg_magnetic * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_VIRAL", gear.dmg_viral * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_CORROSIVE", gear.dmg_corrosive * dmg_multiplier)
+end
+
+export function calculate_damage(enemy, level, gear)
+	enemy = data.enemies[enemy] or error("Unknown enemy: "..enemy)
+	return {
+		normal = enemy_getEffectiveDamage(enemy, level, gear, gear.crit_fail_tier_damage),
+		crit = enemy_getEffectiveDamage(enemy, level, gear, gear.crit_tier_damage),
+	}
 end
 
 -- Compact Share

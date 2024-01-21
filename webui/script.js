@@ -510,11 +510,24 @@ function update_evaluation(outbuild)
 	}
 }
 
-function add_to_simulator(name, value)
+function add_to_simulator(name, dmgeval)
 {
-	let li = document.createElement("li");
-	li.textContent = name + ": " + value.toFixed(2);
-	document.querySelector("#simulator ul").appendChild(li);
+	let p = document.createElement("p");
+	p.innerHTML = "<b>" + name + ":</b>";
+	document.getElementById("simulator-body").appendChild(p);
+
+	let ul = document.createElement("ul");
+	{
+		let li = document.createElement("li");
+		li.textContent = "Normal Damage: " + dmgeval.normal.toFixed(2);
+		ul.appendChild(li);
+	}
+	{
+		let li = document.createElement("li");
+		li.textContent = "Critical Damage: " + dmgeval.crit.toFixed(2);
+		ul.appendChild(li);
+	}
+	document.getElementById("simulator-body").appendChild(ul);
 }
 
 function update_share(share)
