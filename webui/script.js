@@ -74,6 +74,10 @@ data_promise.then(data => {
 			document.getElementById("datalist-melees").appendChild(create_option(key, item.name));
 		}
 	});
+	Object.keys(data.enemies).forEach(key => {
+		let item = data.enemies[key];
+		document.getElementById("datalist-enemies").appendChild(create_option(key, item.name + (item.eximus ? " Eximus" : "")));
+	});
 });
 
 function get_data()
@@ -237,7 +241,16 @@ function evaluate_build()
 		}
 	});
 
-	pluto_invoke("evaluate_build", inbuild, conditionals);
+	let enemy = get_key(document.querySelector("input[list='datalist-enemies']"));
+	let enemy_level = document.getElementById("simulator-level").valueAsNumber;
+	if (enemy && !isNaN(enemy_level))
+	{
+		pluto_invoke("evaluate_build", inbuild, conditionals, enemy, enemy_level);
+	}
+	else
+	{
+		pluto_invoke("evaluate_build", inbuild, conditionals);
+	}
 }
 
 function base64url_encode(uintArray)
@@ -495,6 +508,13 @@ function update_evaluation(outbuild)
 	{
 		evalbody.textContent = "Evaluator is ready.";
 	}
+}
+
+function add_to_simulator(name, value)
+{
+	let li = document.createElement("li");
+	li.textContent = name + ": " + value.toFixed(2);
+	document.querySelector("#simulator ul").appendChild(li);
 }
 
 function update_share(share)

@@ -25,7 +25,14 @@ body
 	}
 }
 
+/* Because sometimes writing logic in CSS is easier than writing it in JS :) */
+
 #conditionals:not(:has(li))
+{
+	display: none;
+}
+
+#simulator:not(:has(li))
 {
 	display: none;
 }

@@ -52,6 +52,12 @@
 		<div id="evaluation-body">
 			<p>Loading, please wait...</p>
 		</div>
+
+		<div id="simulator">
+			<h2>Simulator</h2>
+			<p><input list="datalist-enemies" value="Lancer" /> <input id="simulator-level" type="number" value="100" min="1" max="9999"></p>
+			<ul></ul>
+		</div>
 	</div>
 </div>
 
@@ -119,6 +125,7 @@
 	<option data-key="/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveDamageBoostMythic" value="Tauforged Emerald: +15% Ability Damage on enemies affected by Corrosion Status"></option>
 	<option data-key="/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveStackMythic" value="Tauforged Emerald: Increase max stacks of Corrosion Status by +3"></option>
 </datalist>
+<datalist id="datalist-enemies"></datalist>
 
 <script src="script.js"></script>
 <script type="pluto" src="script.pluto"></script>

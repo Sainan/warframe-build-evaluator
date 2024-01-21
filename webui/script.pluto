@@ -4,12 +4,27 @@ evaluator.init(js_invoke("get_data"))
 
 get_max_rank = |mod| -> evaluator.data.mods[mod].fusion_limit
 
-function evaluate_build(inbuild, conditionals)
+function evaluate_build(inbuild, conditionals, simulator_enemy, simulator_level)
 	js_invoke("update_export", exportvar(inbuild))
 
 	local build = evaluator.parse_build(inbuild)
 	js_invoke("update_conditionals", evaluator.build_getConditionals(build))
-	js_invoke("update_evaluation", evaluator.build_applyConditionals(build, conditionals))
+	local outbuild = evaluator.build_applyConditionals(build, conditionals)
+	js_invoke("update_evaluation", outbuild)
+
+	if simulator_enemy then
+		document.querySelector("#simulator ul").textContent = ""
+		local enemy = evaluator.get_enemy(simulator_enemy)
+		if outbuild.primary then
+			js_invoke("add_to_simulator", "Primary", evaluator.enemy_getEffectiveDamage(enemy, simulator_level, outbuild.primary))
+		end
+		if outbuild.secondary then
+			js_invoke("add_to_simulator", "Secondary", evaluator.enemy_getEffectiveDamage(enemy, simulator_level, outbuild.secondary))
+		end
+		if outbuild.melee then
+			js_invoke("add_to_simulator", "Melee", evaluator.enemy_getEffectiveDamage(enemy, simulator_level, outbuild.melee))
+		end
+	end
 
 	js_invoke("update_share", evaluator.export_build(inbuild):split(""):map(|x| -> x:byte()))
 end
