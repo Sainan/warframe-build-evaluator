@@ -344,24 +344,29 @@ function add_opt_stat(ul, stat, fmt)
 	}
 }
 
-function format_crit_tier(tier)
+function format_crit_value(value, tier)
 {
 	if (tier == 0)
 	{
-		return "T0";
+		return value;
 	}
 	else if (tier == 1)
 	{
-		return '<span style="color:yellow">T1</span>';
+		return '<span style="color:yellow">' + value + '</span>';
 	}
 	else if (tier == 2)
 	{
-		return '<span style="color:orange">T2</span>';
+		return '<span style="color:orange">' + value + '</span>';
 	}
 	else
 	{
-		return '<span style="color:red">T' + tier + '!'.repeat(tier - 3) + '</span>';
+		return '<span style="color:red">' + value + '!'.repeat(tier - 3) + '</span>';
 	}
+}
+
+function format_crit_tier(tier)
+{
+	return format_crit_value("T"+tier, tier);
 }
 
 function add_gear_evaluation(ul, gear)
@@ -510,7 +515,7 @@ function update_evaluation(outbuild)
 	}
 }
 
-function add_to_simulator(name, dmgeval)
+function add_to_simulator(name, dmgeval, outbuild_gear)
 {
 	let p = document.createElement("p");
 	p.innerHTML = "<b>" + name + ":</b>";
@@ -519,12 +524,12 @@ function add_to_simulator(name, dmgeval)
 	let ul = document.createElement("ul");
 	{
 		let li = document.createElement("li");
-		li.textContent = "Normal Damage: " + dmgeval.normal.toFixed(2);
+		li.innerHTML = "Normal Damage: " + format_crit_value(dmgeval.normal.toFixed(2), outbuild_gear.crit_fail_tier);
 		ul.appendChild(li);
 	}
 	{
 		let li = document.createElement("li");
-		li.textContent = "Critical Damage: " + dmgeval.crit.toFixed(2);
+		li.innerHTML = "Critical Damage: " + format_crit_value(dmgeval.crit.toFixed(2), outbuild_gear.crit_tier);
 		ul.appendChild(li);
 	}
 	document.getElementById("simulator-body").appendChild(ul);

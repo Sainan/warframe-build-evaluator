@@ -15,13 +15,13 @@ function evaluate_build(inbuild, conditionals, simulator_enemy, simulator_level)
 	if simulator_enemy then
 		document.querySelector("#simulator-body").textContent = ""
 		if outbuild.primary then
-			js_invoke("add_to_simulator", "Primary", evaluator.calculate_damage(simulator_enemy, simulator_level, outbuild.primary))
+			js_invoke("add_to_simulator", "Primary", evaluator.calculate_damage(simulator_enemy, simulator_level, outbuild.primary), outbuild.primary)
 		end
 		if outbuild.secondary then
-			js_invoke("add_to_simulator", "Secondary", evaluator.calculate_damage(simulator_enemy, simulator_level, outbuild.secondary))
+			js_invoke("add_to_simulator", "Secondary", evaluator.calculate_damage(simulator_enemy, simulator_level, outbuild.secondary), outbuild.secondary)
 		end
 		if outbuild.melee then
-			js_invoke("add_to_simulator", "Melee", evaluator.calculate_damage(simulator_enemy, simulator_level, outbuild.melee))
+			js_invoke("add_to_simulator", "Melee", evaluator.calculate_damage(simulator_enemy, simulator_level, outbuild.melee), outbuild.melee)
 		end
 	end
 
