@@ -84,6 +84,27 @@ build_applyConditionals(build, {
 })
 ```
 
+### Enemies
+
+#### `get_enemy(string): ?Enemy`
+
+#### `enemy_getEffectiveDamage(Enemy, int level, Outbuild.gear): number`
+
+For example, to check the amount of damage dealt by a single Strun pellet with Point Blank R5 against a Lancer's body:
+
+```lua
+local outbuild = evaluate_build {
+    primary = {
+        name = "/Lotus/Weapons/Tenno/Shotgun/Shotgun",
+        mods = {
+            { name = "/Lotus/Upgrades/Mods/Shotgun/WeaponDamageAmountMod", rank = 5 }
+        }
+    }
+}
+local lancer = get_enemy("/Lotus/Types/Enemies/Grineer/AIWeek/Avatars/RifleLancerAvatar")
+print(enemy_getEffectiveDamage(lancer, 100, outbuild.primary)) -- 9.273...
+```
+
 ### Compact Share
 
 #### `export_build(Inbuild): string`
