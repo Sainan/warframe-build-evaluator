@@ -353,9 +353,7 @@ local function init_gear(pe_data)
 end
 
 export function parse_build(inbuild)
-	if not is_inited() then
-		init()
-	end
+	if not is_inited() then init() end
 
 	local build = {}
 	if inbuild.powersuit?.name then
@@ -829,6 +827,8 @@ local function export_mods(mods)
 end
 
 export function export_build(inbuild)
+	if not is_inited() then init() end
+
 	local data = (inbuild.operator?.phoenix_talons ? "\x01" : "\x00")
 
 	local id = powersuit_name_to_id(inbuild.powersuit?.name)
@@ -875,6 +875,8 @@ local function import_mods(data, i)
 end
 
 export function import_build(data)
+	if not is_inited() then init() end
+
 	local format = data:byte(1)
 	assert(format == 0 or format == 1)
 
