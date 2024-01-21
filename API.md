@@ -10,9 +10,13 @@ Note that the evaluator depends on `data.json` in this repository. By default, t
 
 An inbuild is a table of gear_name-gear pairs.
 
+gear_name may be "powersuit", "primary", "secondary" or "melee".
+
 In this context, a gear is a table containing "name", "rank" and "mods". Every property is optional. Rank is assumed max if omitted.
 
 The mods table is an array of mods. Each mod must have a "name" property. The "rank" property is optional and assumed 0 if omitted. Note that rank is uncapped.
+
+The inbuild may also contain an "operator" field, which itself may contain "phoenix_talons" with a value between 0 and 3.
 
 An example inbuild:
 

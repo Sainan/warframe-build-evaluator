@@ -98,7 +98,7 @@ function set_key(input, key)
 function initial_evaluation()
 {
 	evaluate_build();
-	document.querySelectorAll("input[list], input[type='number']").forEach(elm => {
+	document.querySelectorAll("input[list], input[type='number'], select").forEach(elm => {
 		elm.oninput = () => evaluate_build();
 	});
 }
@@ -231,6 +231,14 @@ function evaluate_build()
 		name: get_key(document.querySelector("input[list='datalist-melees']")),
 		mods: tally_mods(document.querySelectorAll("input[list='datalist-melee-mods']"))
 	};
+
+	{
+		let phoenix_talons = parseInt(document.querySelector("select").value);
+		if (phoenix_talons >= 0)
+		{
+			inbuild.operator = { phoenix_talons };
+		}
+	}
 
 	let conditionals = {};
 	document.querySelectorAll("#conditionals input").forEach(input => {

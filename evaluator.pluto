@@ -451,6 +451,16 @@ export function parse_build(inbuild)
 		build.melee = init_gear(pe_data)
 		build.melee.combo_duration = { base = pe_data.comboDuration }
 	end
+	local phoenix_talons_bonus = 0
+	if inbuild.operator?.phoenix_talons then
+		phoenix_talons_bonus = switch inbuild.operator?.phoenix_talons do
+			case 0 -> 0.5
+			case 1 -> 0.10
+			case 2 -> 0.20
+			case 3 -> 0.30
+			default -> error("Invalid phoenix_talons value")
+		end
+	end
 	local sets = {}
 	if inbuild.powersuit then
 		if inbuild.powersuit.mods then
@@ -495,6 +505,11 @@ export function parse_build(inbuild)
 			end
 		end
 		if build.primary then
+			if phoenix_talons_bonus ~= 0 then
+				stat_addOperation(build.primary.dmg_impact, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.primary.dmg_puncture, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.primary.dmg_slash, "STACKING_MULTIPLY", phoenix_talons_bonus)
+			end
 			build.primary.redirects = nil
 		end
 	end
@@ -509,6 +524,11 @@ export function parse_build(inbuild)
 			end
 		end
 		if build.secondary then
+			if phoenix_talons_bonus ~= 0 then
+				stat_addOperation(build.primary.dmg_impact, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.primary.dmg_puncture, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.primary.dmg_slash, "STACKING_MULTIPLY", phoenix_talons_bonus)
+			end
 			build.secondary.redirects = nil
 		end
 	end
@@ -529,6 +549,11 @@ export function parse_build(inbuild)
 			end
 		end
 		if build.melee then
+			if phoenix_talons_bonus ~= 0 then
+				stat_addOperation(build.primary.dmg_impact, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.primary.dmg_puncture, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.primary.dmg_slash, "STACKING_MULTIPLY", phoenix_talons_bonus)
+			end
 			build.melee.redirects = nil
 		end
 	end
@@ -804,7 +829,7 @@ local function export_mods(mods)
 end
 
 export function export_build(inbuild)
-	local data = "\x00"
+	local data = (inbuild.operator?.phoenix_talons ? "\x01" : "\x00")
 
 	local id = powersuit_name_to_id(inbuild.powersuit?.name)
 	data ..= string.pack("I2", id)
@@ -821,6 +846,10 @@ export function export_build(inbuild)
 
 	data ..= string.pack("I3", weapon_name_to_id(inbuild.melee?.name))
 	data ..= export_mods(inbuild.melee?.mods)
+
+	if inbuild.operator?.phoenix_talons then
+		data ..= string.pack("I1", inbuild.operator.phoenix_talons + 1)
+	end
 
 	return data
 end
@@ -846,7 +875,8 @@ local function import_mods(data, i)
 end
 
 export function import_build(data)
-	assert(data:byte(1) == 0)
+	local format = data:byte(1)
+	assert(format == 0 or format == 1)
 
 	local inbuild = {}
 	local i = 2
@@ -896,6 +926,12 @@ export function import_build(data)
 		inbuild.melee = {
 			name = name,
 			mods = mods
+		}
+	end
+
+	if format ~= 0 then
+		inbuild.operator = {
+			phoenix_talons = string.unpack("I1", data, i) - 1
 		}
 	end
 
