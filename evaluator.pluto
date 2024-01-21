@@ -806,21 +806,21 @@ end
 export function export_build(inbuild)
 	local data = "\x00"
 
-	local id = powersuit_name_to_id(inbuild?.powersuit?.name)
+	local id = powersuit_name_to_id(inbuild.powersuit?.name)
 	data ..= string.pack("I2", id)
 	if id ~= 0 then
-		data ..= string.pack("I1", inbuild?.powersuit?.rank or 30)
+		data ..= string.pack("I1", inbuild.powersuit?.rank or 30)
 	end
-	data ..= export_mods(inbuild?.powersuit?.mods)
+	data ..= export_mods(inbuild.powersuit.mods)
 
-	data ..= string.pack("I3", weapon_name_to_id(inbuild?.primary?.name))
-	data ..= export_mods(inbuild?.primary?.mods)
+	data ..= string.pack("I3", weapon_name_to_id(inbuild.primary?.name))
+	data ..= export_mods(inbuild.primary.mods)
 
-	data ..= string.pack("I3", weapon_name_to_id(inbuild?.secondary?.name))
-	data ..= export_mods(inbuild?.secondary?.mods)
+	data ..= string.pack("I3", weapon_name_to_id(inbuild.secondary?.name))
+	data ..= export_mods(inbuild.secondary?.mods)
 
-	data ..= string.pack("I3", weapon_name_to_id(inbuild?.melee?.name))
-	data ..= export_mods(inbuild?.melee?.mods)
+	data ..= string.pack("I3", weapon_name_to_id(inbuild.melee?.name))
+	data ..= export_mods(inbuild.melee?.mods)
 
 	return data
 end
