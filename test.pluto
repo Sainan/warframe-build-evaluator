@@ -155,6 +155,22 @@ do
 	assert(about_equal(build_applyAllConditionals(build).powersuit.health, 2615))
 end
 
+-- Lua script conditionals
+do
+	local build = parse_build {
+	    melee = {
+	        name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger",
+	        mods = {
+	            { name = "/Lotus/Upgrades/CosmeticEnhancers/Offensive/MeleeDamageForActiveShields", rank = 5 }, -- Melee Retaliation
+	        }
+	    }
+	}
+	local outbuild = build_applyConditionals(build, {
+	    ["/Lotus/Upgrades/CosmeticEnhancers/Offensive/MeleeDamageForActiveShields"] = 1
+	})
+	assert(outbuild.melee.dmg_impact == 18.2)
+end
+
 -- Test set mods
 do
 	local inaros_with_umbral_vitality_and_fiber = evaluate_build{
