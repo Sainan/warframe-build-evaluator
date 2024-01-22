@@ -116,7 +116,7 @@ local function gear_getStats(gear, upgrade): table
 			case "DT_ELECTRICITY" -> { "dmgadd_electricity" }
 			case "DT_POISON" -> { "dmgadd_toxin" }
 			case "DT_EXPLOSION" -> { "dmgadd_blast" }
-			case "DT_RADIANT" -> { "dmgadd_radiation" }
+			case "DT_RADIATION" -> { "dmgadd_radiation" }
 			case "DT_GAS" -> { "dmgadd_gas" }
 			case "DT_MAGNETIC" -> { "dmgadd_magnetic" }
 			case "DT_VIRAL" -> { "dmgadd_viral" }
@@ -739,7 +739,7 @@ local function enemy_getEffectiveDamage(enemy, level, gear, dmg_multiplier)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_ELECTRICITY", gear.dmg_electricity * dmg_multiplier)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_POISON", gear.dmg_toxin * dmg_multiplier)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_EXPLOSION", gear.dmg_blast * dmg_multiplier)
-		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_RADIANT", gear.dmg_radiation * dmg_multiplier)
+		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_RADIATION", gear.dmg_radiation * dmg_multiplier)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_GAS", gear.dmg_gas * dmg_multiplier)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_MAGNETIC", gear.dmg_magnetic * dmg_multiplier)
 		+ enemy_getEffectiveDamageOfType(enemy, level, "DT_VIRAL", gear.dmg_viral * dmg_multiplier)
