@@ -1,0 +1,30 @@
+<title>Twitch Arsenal Extension Import | Warframe Build Evaluator Web UI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+	body
+	{
+		font-family: sans-serif;
+	}
+</style>
+
+<h2>Import your build via Twitch Arsenal Extension</h2>
+<p>Note that, in order for this to work, you need to enable "Share Loadouts" under "Data Permissions" in your <a href="https://www.warframe.com/user#gdprSettings" target="_blank">Warframe account settings</a>.</p>
+<p>
+	<input type="text" placeholder="Account username..." autofocus />
+	<select>
+		<option value="pc">PC</option>
+		<option value="ps4">PlayStation</option>
+		<option value="xb1">Xbox</option>
+		<option value="swi">Switch</option>
+	</select>
+</p>
+<p>
+	<button id="import-btn">Import</button>
+	<a href=".."><button>Cancel</button></a>
+</p>
+
+<script src="script.js"></script>
+
+<script src="https://wasm.pluto.do/out/libpluto/0.8.1/libpluto.js"></script>
+<script src="https://pluto-lang.org/PlutoScript/plutoscript.js"></script>
+<script type="pluto" src="script.pluto"></script>

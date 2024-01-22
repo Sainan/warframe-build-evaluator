@@ -1,0 +1,46 @@
+local evaluator = dofile("../../evaluator.pluto")
+
+evaluator.init(js_invoke("get_data"))
+
+function import_mods(mods, upgrades)
+	for upgrades as upgrade do
+		if evaluator.data.mods[upgrade.uniqueName] then
+			mods:insert({
+				name = upgrade.uniqueName,
+				rank = upgrade.rank
+			})
+		end
+	end
+end
+
+function convert_and_export(data)
+	local inbuild = {
+		powersuit = {
+			name = data.loadOuts.NORMAL.warframe.uniqueName,
+			mods = {},
+		},
+		primary = {
+			name = data.loadOuts.NORMAL.primary.uniqueName,
+			mods = {},
+		},
+		secondary = {
+			name = data.loadOuts.NORMAL.secondary.uniqueName,
+			mods = {},
+		},
+		melee = {
+			name = data.loadOuts.NORMAL.melee.uniqueName,
+			mods = {},
+		},
+	};
+	import_mods(inbuild.powersuit.mods, data.loadOuts.NORMAL.warframe.upgrades);
+	import_mods(inbuild.primary.mods, data.loadOuts.NORMAL.primary.upgrades);
+	import_mods(inbuild.secondary.mods, data.loadOuts.NORMAL.secondary.upgrades);
+	import_mods(inbuild.melee.mods, data.loadOuts.NORMAL.melee.upgrades);
+	if data.accountInfo.focus == "/Lotus/Upgrades/Focus/Attack/AttackFocusAbility" then
+		inbuild.operator = {
+			phoenix_talons = 3
+		}
+	end
+
+	return evaluator.export_build(inbuild):split(""):map(|x| -> x:byte())
+end

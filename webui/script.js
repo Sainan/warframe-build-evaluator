@@ -19,6 +19,11 @@ var data_promise = new Promise(resolve => {
 	.then(data => resolve(data));
 });
 
+function get_data()
+{
+	return data_promise;
+}
+
 data_promise.then(data => {
 	Object.keys(data.mods).forEach(key => {
 		let item = data.mods[key];
@@ -30,7 +35,9 @@ data_promise.then(data => {
 				{
 					document.getElementById("datalist-powersuit-mods").appendChild(create_option(key, item.name));
 				}
-				else if (item.type == "PRIMARY")
+				else if (item.type == "PRIMARY"
+					|| item.type == "---" // For /Lotus/Upgrades/Mods/Rifle/WeaponSnipersConvertAmmoMod
+					)
 				{
 					document.getElementById("datalist-primary-mods").appendChild(create_option(key, item.name));
 				}
@@ -38,7 +45,7 @@ data_promise.then(data => {
 				{
 					document.getElementById("datalist-secondary-mods").appendChild(create_option(key, item.name));
 				}
-				else if (item.type == "MELEE")
+				else if (item.type == "MELEE" || item.type == "STANCE")
 				{
 					document.getElementById("datalist-melee-mods").appendChild(create_option(key, item.name));
 				}
@@ -79,11 +86,6 @@ data_promise.then(data => {
 		document.getElementById("datalist-enemies").appendChild(create_option(key, item.name + (item.eximus ? " Eximus" : "")));
 	});
 });
-
-function get_data()
-{
-	return data_promise;
-}
 
 function get_key(input)
 {
@@ -157,6 +159,10 @@ function ready_to_evaluate()
 					set_key(document.querySelector("input[list='datalist-melees']"), build.melee.name);
 				}
 				unpack_mods(document.querySelectorAll("input[list='datalist-melee-mods']"), build.melee.mods);
+			}
+			if (build.operator)
+			{
+				document.querySelector("select").value = build.operator.phoenix_talons;
 			}
 			initial_evaluation();
 		});
@@ -519,7 +525,12 @@ function update_evaluation(outbuild)
 
 	if (evalbody.textContent == "")
 	{
+		document.getElementById("quick-start").style.display = "block";
 		evalbody.textContent = "Evaluator is ready.";
+	}
+	else
+	{
+		document.getElementById("quick-start").style.display = "none";
 	}
 }
 
