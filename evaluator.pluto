@@ -446,13 +446,13 @@ export function parse_build(inbuild)
 		end
 	end
 	if inbuild.primary?.name then
-		build.primary = init_gear(data.weapons[inbuild.primary.name])
+		build.primary = init_gear(data.weapons[inbuild.primary.name] or error("Unknown primary: "..inbuild.primary.name))
 	end
 	if inbuild.secondary?.name then
-		build.secondary = init_gear(data.weapons[inbuild.secondary.name])
+		build.secondary = init_gear(data.weapons[inbuild.secondary.name] or error("Unknown secondary: "..inbuild.secondary.name))
 	end
 	if inbuild.melee?.name then
-		local pe_data = data.weapons[inbuild.melee.name]
+		local pe_data = data.weapons[inbuild.melee.name] or error("Unknown melee: "..inbuild.melee.name)
 		build.melee = init_gear(pe_data)
 		build.melee.combo_duration = { base = pe_data.comboDuration }
 	end
