@@ -523,9 +523,9 @@ export function parse_build(inbuild)
 		end
 		if build.secondary then
 			if phoenix_talons_bonus ~= 0 then
-				stat_addOperation(build.primary.dmg_impact, "STACKING_MULTIPLY", phoenix_talons_bonus)
-				stat_addOperation(build.primary.dmg_puncture, "STACKING_MULTIPLY", phoenix_talons_bonus)
-				stat_addOperation(build.primary.dmg_slash, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.secondary.dmg_impact, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.secondary.dmg_puncture, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.secondary.dmg_slash, "STACKING_MULTIPLY", phoenix_talons_bonus)
 			end
 			build.secondary.redirects = nil
 		end
@@ -548,9 +548,9 @@ export function parse_build(inbuild)
 		end
 		if build.melee then
 			if phoenix_talons_bonus ~= 0 then
-				stat_addOperation(build.primary.dmg_impact, "STACKING_MULTIPLY", phoenix_talons_bonus)
-				stat_addOperation(build.primary.dmg_puncture, "STACKING_MULTIPLY", phoenix_talons_bonus)
-				stat_addOperation(build.primary.dmg_slash, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.melee.dmg_impact, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.melee.dmg_puncture, "STACKING_MULTIPLY", phoenix_talons_bonus)
+				stat_addOperation(build.melee.dmg_slash, "STACKING_MULTIPLY", phoenix_talons_bonus)
 			end
 			build.melee.redirects = nil
 		end
