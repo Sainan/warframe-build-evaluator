@@ -179,6 +179,7 @@ function tally_mods(elm)
 	elm.forEach(input => {
 		let key = get_key(input);
 		let rank_input = input.parentNode.querySelector("input[type='number']");
+		input.style.borderColor = "";
 		if (key)
 		{
 			pluto_invoke("get_max_rank", key).then(max_rank => {
@@ -201,7 +202,7 @@ function tally_mods(elm)
 			rank_input.max = 0;
 			if (input.value != "")
 			{
-				console.log("Ignoring unknown mod:", input.value);
+				input.style.borderColor = "red";
 			}
 		}
 	});
@@ -218,13 +219,14 @@ function evaluate_build()
 	};
 	document.querySelectorAll("input[list='datalist-crystals']").forEach(input => {
 		let key = get_key(input);
+		input.style.borderColor = "";
 		if (key)
 		{
 			inbuild.powersuit.mods.push({ name: key });
 		}
 		else if (input.value != "")
 		{
-			console.log("Ignoring unknown crystal:", input.value);
+			input.style.borderColor = "red";
 		}
 	});
 
