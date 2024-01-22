@@ -206,9 +206,9 @@ local function fusion_level_to_rank(qa): int
 end
 
 local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0, value_multiplier = 1)
-	if mod.Upgrades then
-		if mod.ConditionalUpgrades then
-			for pairs(mod.Upgrades) as upgrade do
+	if mod.data.Upgrades then
+		if mod.data.ConditionalUpgrades then
+			for pairs(mod.data.Upgrades) as upgrade do
 				local stats = gear_getStats(build[gear_name], upgrade)
 				local applied = false
 				for pairs(stats) as stat_name do
@@ -216,10 +216,10 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 					if stat then
 						applied = true
 						stat_addConditional(stat, {
-							type = mod.ConditionalUpgrades[1],
+							type = mod.data.ConditionalUpgrades[1],
 							source = mod_name,
-							proc_chance = mod.UpgradeChance,
-							max_stacks = mod.MaxConditionalStacks,
+							proc_chance = mod.data.UpgradeChance,
+							max_stacks = mod.data.MaxConditionalStacks,
 							operation = upgrade.OperationType,
 							value = upgrade.Value * value_multiplier,
 						})
@@ -231,10 +231,10 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 						for pairs(upgrade_stats) as upgrade_stat_name do
 							if stat := build[upgrade_gear_name]?[upgrade_stat_name] then
 								stat_addConditional(stat, {
-									type = mod.ConditionalUpgrades[1],
+									type = mod.data.ConditionalUpgrades[1],
 									source = mod_name,
-									proc_chance = mod.UpgradeChance,
-									max_stacks = mod.MaxConditionalStacks,
+									proc_chance = mod.data.UpgradeChance,
+									max_stacks = mod.data.MaxConditionalStacks,
 									operation = upgrade.OperationType,
 									value = upgrade.Value * value_multiplier,
 								})
@@ -244,7 +244,7 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 				end
 			end
 		else
-			for pairs(mod.Upgrades) as upgrade do
+			for pairs(mod.data.Upgrades) as upgrade do
 				local applied = false
 				local stats = gear_getStats(build[gear_name], upgrade)
 				for pairs(stats) as stat_name do
@@ -288,8 +288,8 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 			end
 		end
 	end
-	if mod.ExtraUpgrades and rank >= fusion_level_to_rank(mod.ExtraUpgradeFusionLevel) then
-		for pairs(mod.ExtraUpgrades) as upgrade do
+	if mod.data.ExtraUpgrades and rank >= fusion_level_to_rank(mod.data.ExtraUpgradeFusionLevel) then
+		for pairs(mod.data.ExtraUpgrades) as upgrade do
 			if upgrade.ValidType ~= "" then
 				assert(upgrade.ValidType == "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon")
 				local stats = gear_getStats(build.melee, upgrade)
@@ -308,10 +308,10 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 			end
 		end
 	end
-	if mod.SubUpgrades then
-		for pairs(mod.SubUpgrades) as sub_upgrade do
+	if mod.data.SubUpgrades then
+		for pairs(mod.data.SubUpgrades) as sub_upgrade do
 			if sub_mod := data.sub_upgrades[sub_upgrade] then
-				build_applyMod(build, gear_name, mod_name, sub_mod.data, rank, value_multiplier)
+				build_applyMod(build, gear_name, mod_name, sub_mod, rank, value_multiplier)
 			end
 		end
 	end
@@ -464,26 +464,26 @@ export function parse_build(inbuild)
 		if inbuild.powersuit.mods then
 			local aura_mod
 			for pairs(inbuild.powersuit.mods) as mod do
-				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				local mod_obj = (data.mods[mod.name] or error("Unknown mod: "..mod.name))
 				local set_bonus = 1
-				if mod_data.ModSetValues then
-					local n = get_num_mods_from_set(inbuild.powersuit.mods, mod_data.ModSet)
+				if mod_obj.data.ModSetValues then
+					local n = get_num_mods_from_set(inbuild.powersuit.mods, mod_obj.data.ModSet)
 					if n > 1 then
-						set_bonus += mod_data.ModSetValues[n - 1]
+						set_bonus += mod_obj.data.ModSetValues[n - 1]
 					end
-				elseif mod_data.ModSet then
-					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+				elseif mod_obj.data.ModSet then
+					sets[mod_obj.data.ModSet] = (sets[mod_obj.data.ModSet] or 0) + 1
 				end
 				local value_multiplier = ((mod.rank or 0) + 1) * set_bonus
 				if data.mods[mod.name].type == "AURA" then
 					-- Save aura mod for later so aura strength can be applied
-					aura_mod = { name = mod.name, data = mod_data, rank = mod.rank, mult = value_multiplier }
+					aura_mod = { name = mod.name, obj = mod_obj, rank = mod.rank, mult = value_multiplier }
 				else
-					build_applyMod(build, "powersuit", mod.name, mod_data, rank, value_multiplier)
+					build_applyMod(build, "powersuit", mod.name, mod_obj, rank, value_multiplier)
 				end
 			end
 			if aura_mod then
-				build_applyMod(build, "powersuit", aura_mod.name, aura_mod.data, aura_mod.rank, aura_mod.mult * stat_getValue(build.powersuit.aura_strength) * stat_getValue(build.powersuit.aura_effectiveness))
+				build_applyMod(build, "powersuit", aura_mod.name, aura_mod.obj, aura_mod.rank, aura_mod.mult * stat_getValue(build.powersuit.aura_strength) * stat_getValue(build.powersuit.aura_effectiveness))
 			end
 		end
 		if build.powersuit then
@@ -495,11 +495,11 @@ export function parse_build(inbuild)
 	if inbuild.primary then
 		if inbuild.primary.mods then
 			for pairs(inbuild.primary.mods) as mod do
-				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
-				if mod_data.ModSet then
-					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+				local mod_obj = (data.mods[mod.name] or error("Unknown mod: "..mod.name))
+				if mod_obj.data.ModSet then
+					sets[mod_obj.data.ModSet] = (sets[mod_obj.data.ModSet] or 0) + 1
 				end
-				build_applyMod(build, "primary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
+				build_applyMod(build, "primary", mod.name, mod_obj, mod.rank, (mod.rank or 0) + 1)
 			end
 		end
 		if build.primary then
@@ -514,11 +514,11 @@ export function parse_build(inbuild)
 	if inbuild.secondary then
 		if inbuild.secondary.mods then
 			for pairs(inbuild.secondary.mods) as mod do
-				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
-				if mod_data.ModSet then
-					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+				local mod_obj = (data.mods[mod.name] or error("Unknown mod: "..mod.name))
+				if mod_obj.data.ModSet then
+					sets[mod_obj.data.ModSet] = (sets[mod_obj.data.ModSet] or 0) + 1
 				end
-				build_applyMod(build, "secondary", mod.name, mod_data, mod.rank, (mod.rank or 0) + 1)
+				build_applyMod(build, "secondary", mod.name, mod_obj, mod.rank, (mod.rank or 0) + 1)
 			end
 		end
 		if build.secondary then
@@ -533,17 +533,17 @@ export function parse_build(inbuild)
 	if inbuild.melee then
 		if inbuild.melee.mods then
 			for pairs(inbuild.melee.mods) as mod do
-				local mod_data = (data.mods[mod.name] or error("Unknown mod: "..mod.name)).data
+				local mod_obj = (data.mods[mod.name] or error("Unknown mod: "..mod.name))
 				local set_bonus = 1
-				if mod_data.ModSetValues then
-					local n = get_num_mods_from_set(inbuild.melee.mods, mod_data.ModSet)
+				if mod_obj.data.ModSetValues then
+					local n = get_num_mods_from_set(inbuild.melee.mods, mod_obj.data.ModSet)
 					if n > 1 then
-						set_bonus += mod_data.ModSetValues[n - 1]
+						set_bonus += mod_obj.data.ModSetValues[n - 1]
 					end
-				elseif mod_data.ModSet then
-					sets[mod_data.ModSet] = (sets[mod_data.ModSet] or 0) + 1
+				elseif mod_obj.data.ModSet then
+					sets[mod_obj.data.ModSet] = (sets[mod_obj.data.ModSet] or 0) + 1
 				end
-				build_applyMod(build, "melee", mod.name, mod_data, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
+				build_applyMod(build, "melee", mod.name, mod_obj, mod.rank, ((mod.rank or 0) + 1) * set_bonus)
 			end
 		end
 		if build.melee then
@@ -556,7 +556,7 @@ export function parse_build(inbuild)
 		end
 	end
 	for set, n in pairs(sets) do
-		build_applyMod(build, nil, set, data.modsets[set].data, n, n)
+		build_applyMod(build, nil, set, data.modsets[set], n, n)
 	end
 	return build
 end
