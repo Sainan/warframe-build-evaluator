@@ -87,6 +87,7 @@ local function valid_type_to_gear_name(validType): ?string
 	return switch validType do
 		case "/Lotus/Weapons/Tenno/LotusLongGun" -> "primary"
 		case "/Lotus/Weapons/Tenno/LotusPistol" -> "secondary"
+		case "/Lotus/Types/Game/LotusMeleeWeapon" -> "melee"
 		case "/Lotus/Weapons/Tenno/Melee/PlayerMeleeWeapon" -> "melee"
 	end
 end
