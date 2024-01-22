@@ -10,7 +10,7 @@ body
 	padding: 8px 16px;
 }
 
-@media (min-width: 700px)
+@media (min-width: 800px)
 {
 	.grid
 	{
