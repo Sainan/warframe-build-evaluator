@@ -197,6 +197,23 @@ local function gear_addStatOperation(gear, stat_name, operation_type, value)
 	end
 end
 
+local function build_getStats(build, gear_name, upgrade)
+	local applies = false
+	local stats = gear_getStats(build[gear_name], upgrade)
+	for pairs(stats) as stat_name do
+		if build[gear_name]?[stat_name] then
+			applies = true
+			break
+		end
+	end
+	if not applies then
+		if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) or valid_type_to_gear_name(upgrade.ValidType) then
+			return upgrade_gear_name, gear_getStats(build[upgrade_gear_name], upgrade)
+		end
+	end
+	return gear_name, stats
+end
+
 local function fusion_level_to_rank(qa): int
 	return switch qa do
 		case "QA_VERY_HIGH" -> 10
@@ -214,12 +231,10 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 	if upgrades then
 		if mod.data.ConditionalUpgrades then
 			for pairs(upgrades) as upgrade do
-				local stats = gear_getStats(build[gear_name], upgrade)
-				local applied = false
+				local upgrade_gear_name, stats = build_getStats(build, gear_name, upgrade)
 				for pairs(stats) as stat_name do
-					local stat = build[gear_name]?[stat_name]
+					local stat = build[upgrade_gear_name]?[stat_name]
 					if stat then
-						applied = true
 						stat_addConditional(stat, {
 							type = mod.data.ConditionalUpgrades[1],
 							source = mod_name,
@@ -230,32 +245,13 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 						})
 					end
 				end
-				if not applied then
-					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) or valid_type_to_gear_name(upgrade.ValidType) then
-						local upgrade_stats = gear_getStats(build[upgrade_gear_name], upgrade)
-						for pairs(upgrade_stats) as upgrade_stat_name do
-							if stat := build[upgrade_gear_name]?[upgrade_stat_name] then
-								stat_addConditional(stat, {
-									type = mod.data.ConditionalUpgrades[1],
-									source = mod_name,
-									proc_chance = mod.data.UpgradeChance,
-									max_stacks = mod.data.MaxConditionalStacks,
-									operation = upgrade.OperationType,
-									value = upgrade.Value * value_multiplier,
-								})
-							end
-						end
-					end
-				end
 			end
 		else
 			for pairs(upgrades) as upgrade do
-				local applied = false
-				local stats = gear_getStats(build[gear_name], upgrade)
+				local upgrade_gear_name, stats = build_getStats(build, gear_name, upgrade)
 				for pairs(stats) as stat_name do
-					local stat = build[gear_name]?[stat_name]
+					local stat = build[upgrade_gear_name]?[stat_name]
 					if stat then
-						applied = true
 						if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 							stat_addConditional(stat, {
 								type = upgrade.ValidModifiers[1],
@@ -275,20 +271,9 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 								})
 							end
 						else
-							gear_addStatOperation(build[gear_name], stat_name, upgrade.OperationType, upgrade.Value * value_multiplier)
+							gear_addStatOperation(build[upgrade_gear_name], stat_name, upgrade.OperationType, upgrade.Value * value_multiplier)
 						end
 					end
-				end
-				if not applied then
-					if upgrade_gear_name := upgrade_type_to_gear_name(upgrade.UpgradeType) or valid_type_to_gear_name(upgrade.ValidType) then
-						local upgrade_stats = gear_getStats(build[upgrade_gear_name], upgrade)
-						for pairs(upgrade_stats) as upgrade_stat_name do
-							if stat := build[upgrade_gear_name]?[upgrade_stat_name] then
-								gear_addStatOperation(build[upgrade_gear_name], upgrade_stat_name, upgrade.OperationType, upgrade.Value * value_multiplier)
-							end
-						end
-					end
-
 				end
 			end
 		end
