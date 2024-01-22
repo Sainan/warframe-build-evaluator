@@ -57,7 +57,7 @@ local function stat_getValue(stat)
 	return stat.base * (stat.stacking_multiply_base or 1) + (stat.add or 0)
 end
 
-local function stat_applyConditionals(stat, to_apply)
+local function build_applyStatConditionals(build, stat, to_apply)
 	local tmp = {
 		base = stat.base,
 		stacking_multiply_base = stat.stacking_multiply_base,
@@ -65,7 +65,14 @@ local function stat_applyConditionals(stat, to_apply)
 	}
 	if stat.conditionals then
 		for pairs(stat.conditionals) as conditional do
-			if to_apply[conditional.name] ~= nil then
+			if conditional.consteval then
+				assert(conditional.type:sub(1, 7) == "power>=")
+				if build.powersuit then
+					if stat_getValue(build.powersuit.power) >= tonumber(conditional.type:sub(8)) then
+						stat_addOperation(tmp, conditional.operation, conditional.value)
+					end
+				end
+			elseif to_apply[conditional.name] ~= nil then
 				stat_addOperation(tmp, conditional.operation, conditional.value * to_apply[conditional.name])
 			end
 		end
@@ -223,6 +230,15 @@ local function fusion_level_to_rank(qa): int
 	end
 end
 
+local function get_script_prop(mod, prop)
+	repeat
+		if mod.data.Script[prop] then
+			return mod.data.Script[prop]
+		end
+		mod = data.mods[mod.parent]
+	until mod == nil
+end
+
 local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0, value_multiplier = 1)
 	local upgrades = mod.data.Upgrades
 	if upgrades == nil then
@@ -233,8 +249,7 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 			for pairs(upgrades) as upgrade do
 				local upgrade_gear_name, stats = build_getStats(build, gear_name, upgrade)
 				for pairs(stats) as stat_name do
-					local stat = build[upgrade_gear_name]?[stat_name]
-					if stat then
+					if stat := build[upgrade_gear_name]?[stat_name] then
 						stat_addConditional(stat, {
 							type = mod.data.ConditionalUpgrades[1],
 							source = mod_name,
@@ -250,8 +265,7 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 			for pairs(upgrades) as upgrade do
 				local upgrade_gear_name, stats = build_getStats(build, gear_name, upgrade)
 				for pairs(stats) as stat_name do
-					local stat = build[upgrade_gear_name]?[stat_name]
-					if stat then
+					if stat := build[upgrade_gear_name]?[stat_name] then
 						if upgrade.ValidModifiers and #upgrade.ValidModifiers ~= 0 then
 							stat_addConditional(stat, {
 								type = upgrade.ValidModifiers[1],
@@ -305,19 +319,35 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 			end
 		end
 	end
-	if mod.data.Script?.Script then
-		if mod.data.Script.Script == "MeleeDamageForActiveShields.lua" then
+	if mod.data.Script then
+		local script = get_script_prop(mod, "Script")
+		if script == "MeleeDamageForActiveShields.lua" then
 			if build.melee then
 				local stats = gear_getStats(build.melee, { UpgradeType = "WEAPON_MELEE_DAMAGE" })
 				for pairs(stats) as stat_name do
-					local value = mod.data.Script._meleeDamagePerBonus * value_multiplier
+					local value = get_script_prop(mod, "_meleeDamagePerBonus") * value_multiplier
 					stat_addConditional(build.melee[stat_name], {
-						type = mod.data.Script.Script,
+						type = script,
 						source = mod_name,
-						max_stacks = mod.data.Script._meleeDamageLimit / value + 1,
+						max_stacks = get_script_prop(mod, "_meleeDamageLimit") / value + 1,
 						operation = "STACKING_MULTIPLY",
 						value = value
 					})
+				end
+			end
+		elseif script == "/Lotus/Scripts/Mods/UpgradeStackAfterEnergyThreshold.lua" then
+			local upgrade_gear_name, stats = build_getStats(build, gear_name, { UpgradeType = get_script_prop(mod, "_upgradeType"), ValidType = get_script_prop(mod, "_objectType") })
+			for pairs(stats) as stat_name do
+				for pairs(get_script_prop(mod, "_thresholds")) as threshold do
+					if stat := build[upgrade_gear_name]?[stat_name] then
+						stat_addConditional(stat, {
+							type = "power>="..threshold,
+							source = mod_name,
+							consteval = true,
+							operation = get_script_prop(mod, "_operationType"),
+							value = get_script_prop(mod, "_value")
+						})
+					end
 				end
 			end
 		end
@@ -574,7 +604,7 @@ export function build_getConditionals(build)
 		for pairs(gear) as stat do
 			if stat.conditionals then
 				for pairs(stat.conditionals) as conditional do
-					if not conditionals[conditional.name] then
+					if not conditionals[conditional.name] and not conditional.consteval then
 						conditionals[conditional.name] = {
 							type = conditional.type,
 							source = conditional.source,
@@ -663,7 +693,7 @@ export function build_applyConditionals(build, to_apply)
 	for gear_name, gear in pairs(build) do
 		outbuild[gear_name] = {}
 		for stat_name, stat in pairs(gear) do
-			outbuild[gear_name][stat_name] = stat_applyConditionals(stat, to_apply)
+			outbuild[gear_name][stat_name] = build_applyStatConditionals(build, stat, to_apply)
 		end
 	end
 	if outbuild.powersuit then

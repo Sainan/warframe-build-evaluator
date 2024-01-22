@@ -170,6 +170,37 @@ do
 	})
 	assert(outbuild.melee.dmg_impact == 18.2)
 end
+do
+	local outbuild = evaluate_build {
+		powersuit = {
+			name = "/Lotus/Powersuits/Excalibur/Excalibur",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Warframe/Expert/AvatarPowerMaxModExpert", rank = 10 }, -- Primed FLow
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoostMythic" },
+			}
+		},
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger"
+		}
+	}
+	assert(outbuild.melee.crit_damage == 2.0625)
+end
+do
+	local outbuild = evaluate_build {
+		powersuit = {
+			name = "/Lotus/Powersuits/Excalibur/Excalibur",
+			mods = {
+				{ name = "/Lotus/Upgrades/Mods/Warframe/Expert/AvatarPowerMaxModExpert", rank = 10 }, -- Primed FLow
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoostMythic" },
+				{ name = "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeEnergyMaxMythic" },
+			}
+		},
+		melee = {
+			name = "/Lotus/Weapons/Tenno/Melee/Dagger/CeramicDagger"
+		}
+	}
+	assert(outbuild.melee.crit_damage == 2.625)
+end
 
 -- Test set mods
 do
