@@ -178,14 +178,14 @@ function tally_mods(elm)
 	let mods = [];
 	elm.forEach(input => {
 		let key = get_key(input);
+		let rank_input = input.parentNode.querySelector("input[type='number']");
 		if (key)
 		{
 			pluto_invoke("get_max_rank", key).then(max_rank => {
-				let rank_input = input.parentNode.querySelector("input[type='number']");
-				if (rank_input.valueAsNumber > max_rank)
+				if (rank_input.max != max_rank)
 				{
+					rank_input.max = max_rank;
 					rank_input.valueAsNumber = max_rank;
-					evaluate_build();
 				}
 			});
 			let rank = input.parentNode.querySelector("input[type='number']").valueAsNumber;
@@ -195,9 +195,14 @@ function tally_mods(elm)
 			}
 			mods.push({ name: key, rank: rank });
 		}
-		else if (input.value != "")
+		else
 		{
-			console.log("Ignoring unknown mod:", input.value);
+			rank_input.valueAsNumber = 0;
+			rank_input.max = 0;
+			if (input.value != "")
+			{
+				console.log("Ignoring unknown mod:", input.value);
+			}
 		}
 	});
 	return mods;
