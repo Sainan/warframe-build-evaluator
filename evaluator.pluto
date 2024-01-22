@@ -320,6 +320,23 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 			end
 		end
 	end
+	if mod.data.Script?.Script then
+		if mod.data.Script.Script == "MeleeDamageForActiveShields.lua" then
+			if build.melee then
+				local stats = gear_getStats(build.melee, { UpgradeType = "WEAPON_MELEE_DAMAGE" })
+				for pairs(stats) as stat_name do
+					local value = mod.data.Script._meleeDamagePerBonus * value_multiplier
+					stat_addConditional(build.melee[stat_name], {
+						type = mod.data.Script.Script,
+						source = mod_name,
+						max_stacks = mod.data.Script._meleeDamageLimit / value + 1,
+						operation = "STACKING_MULTIPLY",
+						value = value
+					})
+				end
+			end
+		end
+	end
 end
 
 local function init_gear(pe_data)
