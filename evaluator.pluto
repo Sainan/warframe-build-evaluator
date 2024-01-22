@@ -206,9 +206,13 @@ local function fusion_level_to_rank(qa): int
 end
 
 local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0, value_multiplier = 1)
-	if mod.data.Upgrades then
+	local upgrades = mod.data.Upgrades
+	if upgrades == nil then
+		upgrades = data.mods[mod.parent]?.data?.Upgrades
+	end
+	if upgrades then
 		if mod.data.ConditionalUpgrades then
-			for pairs(mod.data.Upgrades) as upgrade do
+			for pairs(upgrades) as upgrade do
 				local stats = gear_getStats(build[gear_name], upgrade)
 				local applied = false
 				for pairs(stats) as stat_name do
@@ -244,7 +248,7 @@ local function build_applyMod(build, gear_name: ?string, mod_name, mod, rank = 0
 				end
 			end
 		else
-			for pairs(mod.data.Upgrades) as upgrade do
+			for pairs(upgrades) as upgrade do
 				local applied = false
 				local stats = gear_getStats(build[gear_name], upgrade)
 				for pairs(stats) as stat_name do

@@ -342,3 +342,16 @@ do
 	assert(about_equal(build.secondary.dmg_radiation, 60))
 	assert(about_equal(build.secondary.dmg_cold, 22.5))
 end
+
+-- Innate elemental + mod with upgrade from inheritance
+do
+	local outbuild = evaluate_build {
+    	secondary = {
+	        name = "/Lotus/Weapons/VoidTrader/VTDetron", -- Mara Detron
+	        mods = {
+	            { name = "/Lotus/Upgrades/Mods/Pistol/Expert/WeaponFireDamageModExpert", rank = 10 }, -- Primed Heated Charge
+	        },
+	    }
+	}
+	assert(outbuild.secondary.dmg_heat == 66)
+end
