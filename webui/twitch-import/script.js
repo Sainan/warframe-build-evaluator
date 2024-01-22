@@ -6,8 +6,13 @@ document.getElementById("import-btn").onclick = function()
 		return;
 	}
 	busy = true;
+	document.getElementById("import-btn").textContent = "Importing...";
 	fetch("https://api.builds.wf/arsenal?account="+encodeURIComponent(document.querySelector("input[type='text']").value)+"&platform="+document.querySelector("select").value)
 	.then(resp=>resp.json().then(data=>{
+		if (!data)
+		{
+			throw new Error("Got null");
+		}
 		pluto_invoke("convert_and_export", data).then(share => {
 			location.href = "../#" +base64url_encode(new Uint8Array(Object.values(share)));
 		});
@@ -16,8 +21,9 @@ document.getElementById("import-btn").onclick = function()
 	{
 		console.error(e);
 		alert("Import failed.");
-	})
-	.finally(() => busy = false);
+		busy = false;
+		document.getElementById("import-btn").textContent = "Import";
+	});
 };
 
 function base64url_encode(uintArray)
