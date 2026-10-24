@@ -224,8 +224,13 @@ int main()
 					auto mod = soup::make_unique<JsonObject>();
 
 					const JsonString& jUniqueName = mod_pe.asObj().at("uniqueName").asStr();
+					const JsonString& name = mod_pe.asObj().at("name").asStr();
+					if (name.value.empty())
+					{
+						continue;
+					}
 
-					mod->add("name", mod_pe.asObj().at("name").asStr());
+					mod->add("name", name);
 					mod->add("exclude", exclude_mods->asObj().find(jUniqueName));
 					mod->add("fusion_limit", mod_pe.asObj().at("fusionLimit").asInt());
 					auto obj = get_packages_bin_data(jUniqueName);
