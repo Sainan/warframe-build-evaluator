@@ -127,7 +127,7 @@ function ready_to_evaluate()
 	let share = location.hash.substr(1);
 	if (share)
 	{
-		pluto_invoke("unpack_share", base64url_decode(share)).then(build => {
+		pluto_invoke("unpack_share", share).then(build => {
 			if (build.powersuit)
 			{
 				if (build.powersuit.name)
@@ -183,7 +183,7 @@ async function tally_mods(elm)
 		input.style.borderColor = "";
 		if (key)
 		{
-			let max_rank = await pluto_invoke("get_max_rank", key);
+			let max_rank = Number(await pluto_invoke("get_max_rank", key));
 			if (rank_input.max != max_rank)
 			{
 				rank_input.max = max_rank;
@@ -272,26 +272,6 @@ async function evaluate_build()
 	{
 		pluto_invoke("evaluate_build", inbuild, conditionals);
 	}
-}
-
-function base64url_encode(uintArray)
-{
-    let binaryString = Array.from(uintArray).map(byte => String.fromCharCode(byte)).join('');
-    let base64String = btoa(binaryString);
-    return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-function base64url_decode(str)
-{
-    let paddedStr = str.padEnd(str.length + (4 - str.length % 4) % 4, '=');
-    let base64String = paddedStr.replace(/-/g, '+').replace(/_/g, '/');
-    let binaryString = atob(base64String);
-    let uintArray = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++)
-    {
-        uintArray[i] = binaryString.charCodeAt(i);
-    }
-    return uintArray;
 }
 
 function update_export(str)
@@ -461,42 +441,42 @@ function update_evaluation(outbuild)
 				let nested_ul = document.createElement("ul");
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = outbuild.powersuit.health.toFixed(1) + " Health";
+					nested_li.textContent = Number(outbuild.powersuit.health).toFixed(1) + " Health";
 					nested_ul.appendChild(nested_li);
 				}
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = outbuild.powersuit.armor.toFixed(1) + " Armor reduces " + (outbuild.powersuit.armor_damage_reduction * 100).toFixed(1) + "% of incoming damage";
+					nested_li.textContent = Number(outbuild.powersuit.armor).toFixed(1) + " Armor reduces " + (outbuild.powersuit.armor_damage_reduction * 100).toFixed(1) + "% of incoming damage";
 					nested_ul.appendChild(nested_li);
 				}
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = outbuild.powersuit.power.toFixed(1) + " Energy can be converted to health with " + (outbuild.powersuit.power_to_health_efficiency * 100).toFixed(0) + "% efficiency";
+					nested_li.textContent = Number(outbuild.powersuit.power).toFixed(1) + " Energy can be converted to health with " + (Number(outbuild.powersuit.power_to_health_efficiency) * 100).toFixed(0) + "% efficiency";
 					nested_ul.appendChild(nested_li);
 				}
 				if (outbuild.powersuit.heal_rate != 0)
 				{
 					let nested_li = document.createElement("li");
-					nested_li.textContent = "+ " + outbuild.powersuit.heal_rate.toFixed(1) + " Health regenerated per second";
+					nested_li.textContent = "+ " + Number(outbuild.powersuit.heal_rate).toFixed(1) + " Health regenerated per second";
 					nested_ul.appendChild(nested_li);
 				}
 				li.appendChild(nested_ul);
 			}
 			ul.appendChild(li);
 		}
-		add_stat(ul, outbuild.powersuit.shield, "{} Shield");
-		add_stat(ul, outbuild.powersuit.ability_duration * 100, "{}% Ability Duration");
-		add_stat(ul, outbuild.powersuit.ability_efficiency * 100, "{}% Ability Efficiency");
-		add_stat(ul, outbuild.powersuit.ability_range * 100, "{}% Ability Range");
-		add_stat(ul, outbuild.powersuit.ability_strength * 100, "{}% Ability Strength");
+		add_stat(ul, Number(outbuild.powersuit.shield), "{} Shield");
+		add_stat(ul, Number(outbuild.powersuit.ability_duration) * 100, "{}% Ability Duration");
+		add_stat(ul, Number(outbuild.powersuit.ability_efficiency) * 100, "{}% Ability Efficiency");
+		add_stat(ul, Number(outbuild.powersuit.ability_range) * 100, "{}% Ability Range");
+		add_stat(ul, Number(outbuild.powersuit.ability_strength) * 100, "{}% Ability Strength");
 		{
 			let li = document.createElement("li");
-			li.textContent = outbuild.powersuit.movement_speed.toFixed(2) + " Movement Speed (" + outbuild.powersuit.movement_speed_mps.toFixed(1) + "m/s)";
+			li.textContent = Number(outbuild.powersuit.movement_speed).toFixed(2) + " Movement Speed (" + Number(outbuild.powersuit.movement_speed_mps).toFixed(1) + "m/s)";
 			ul.appendChild(li);
 		}
 		{
 			let li = document.createElement("li");
-			li.textContent = outbuild.powersuit.sprint_speed.toFixed(2) + " Sprint Speed (" + outbuild.powersuit.sprint_speed_mps.toFixed(1) + "m/s)";
+			li.textContent = Number(outbuild.powersuit.sprint_speed).toFixed(2) + " Sprint Speed (" + Number(outbuild.powersuit.sprint_speed_mps).toFixed(1) + "m/s)";
 			ul.appendChild(li);
 		}
 		evalbody.appendChild(ul);
@@ -532,7 +512,7 @@ function update_evaluation(outbuild)
 
 		let ul = document.createElement("ul");
 		add_gear_evaluation(ul, outbuild.melee);
-		add_stat(ul, outbuild.melee.combo_duration, "{}s Combo Duration");
+		add_stat(ul, Number(outbuild.melee.combo_duration), "{}s Combo Duration");
 		evalbody.appendChild(ul);
 	}
 
@@ -574,5 +554,5 @@ function add_to_simulator(name, dmgeval, outbuild_gear)
 
 function update_share(share)
 {
-	location.hash = base64url_encode(new Uint8Array(Object.values(share)));
+	location.hash = share;
 }

@@ -1,3 +1,4 @@
+local base64 = require "pluto:base64"
 local evaluator = dofile("../evaluator.pluto")
 
 evaluator.init(js_invoke("get_data"))
@@ -25,9 +26,11 @@ function evaluate_build(inbuild, conditionals, simulator_enemy, simulator_level)
 		end
 	end
 
-	js_invoke("update_share", evaluator.export_build(inbuild):split(""):map(|x| -> x:byte()))
+	js_invoke("update_share", base64.urlencode(evaluator.export_build(inbuild)))
 end
 
-unpack_share = evaluator.import_build
+function unpack_share(share)
+	return evaluator.import_build(base64.urldecode(share))
+end
 
 js_invoke("ready_to_evaluate")
