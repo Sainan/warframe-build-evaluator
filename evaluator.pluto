@@ -868,7 +868,7 @@ export function export_build(inbuild)
 	data ..= export_mods(inbuild.powersuit.mods)
 
 	data ..= string.pack("I3", weapon_name_to_id(inbuild.primary?.name))
-	data ..= export_mods(inbuild.primary.mods)
+	data ..= export_mods(inbuild.primary?.mods)
 
 	data ..= string.pack("I3", weapon_name_to_id(inbuild.secondary?.name))
 	data ..= export_mods(inbuild.secondary?.mods)
