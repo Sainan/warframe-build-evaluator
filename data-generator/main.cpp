@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <base64.hpp>
 #include <json.hpp>
 #include <string.hpp>
 
@@ -10,6 +11,7 @@ using namespace soup;
 static const std::string PACKAGES_BIN_BASE = "F:/warframe-packages-bin-data";
 static const std::filesystem::path LANGUAGES_BIN_DICT = "../../warframe-languages-bin-data/en.json";
 static const std::filesystem::path PUBLIC_EXPORT_BASE = "../../warframe-public-export";
+static const std::filesystem::path PUBLIC_EXPORT_PLUS_BASE = "../../warframe-public-export-plus";
 
 static UniquePtr<JsonNode> dict;
 
@@ -473,6 +475,7 @@ int main()
 
 		std::cout << "Finalising...\n";
 		{
+			all_data.add("util_wasm_b64", base64::encode(string::fromFile(PUBLIC_EXPORT_PLUS_BASE / "supplementals" / "util.wasm")));
 			string::toFile("../data.json", all_data.encodePretty());
 			system("cd .. && pluto convert_data.pluto");
 		}
