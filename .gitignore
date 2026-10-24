@@ -1,2 +1,4 @@
-data-generator/**
-!data-generator/exclude-mods.json
+data-generator/int/
+data-generator/*.exe
+data-generator/*.ilk
+data-generator/*.pdb
